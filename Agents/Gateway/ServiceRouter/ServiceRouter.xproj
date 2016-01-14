@@ -16,9 +16,7 @@
     <UpdateServiceFabricManifestEnabled>False</UpdateServiceFabricManifestEnabled>
     <ServiceFabricServiceManifestPath>PackageRoot\ServiceManifest.xml</ServiceFabricServiceManifestPath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <ProduceOutputsOnBuild>True</ProduceOutputsOnBuild>
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
   <ItemGroup>
     <DnxInvisibleContent Include="bower.json" />
     <DnxInvisibleContent Include=".bowerrc" />

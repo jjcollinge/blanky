@@ -13,7 +13,7 @@ namespace ServiceRouter
         {
             using (var fabricRuntime = FabricRuntime.Create())
             {
-                fabricRuntime.RegisterServiceType("ServiceRouter", typeof(ServiceRouter));
+                fabricRuntime.RegisterServiceType("ServiceRouterType", typeof(ServiceRouter));
 
                 Thread.Sleep(Timeout.Infinite);
             }

@@ -14,17 +14,6 @@
       "environmentVariables": {
         "Hosting:Environment": "Development"
       }
-    },
-    "web": {
-      "commandName": "web",
-      "environmentVariables": {
-        "Hosting:Environment": "Development"
-      }
-    },
-    "ServiceRouter": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "sdkVersion": "dnx-clr-win-x64.1.0.0-rc2-16357"
     }
   }
 }
