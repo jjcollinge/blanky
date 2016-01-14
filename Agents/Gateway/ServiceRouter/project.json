@@ -1,0 +1,29 @@
+{
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+  "dependencies": {
+    "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc1-final",
+    "Microsoft.ServiceFabric": "4.4.87-preview",
+    "Microsoft.ServiceFabric.Services": "1.4.87-preview",
+    "Microsoft.AspNet.Hosting": "1.0.0-rc2-16161"
+  },
+  "frameworks": {
+    "dnx451": {
+      "frameworkAssemblies": {
+        "System.Net.Http": "4.0.0.0"
+      }
+    }
+  },
+  "exclude": [
+    "wwwroot",
+    "node_modules",
+    "PackageRoot"
+  ],
+  "publishExclude": [
+    "**.user",
+    "**.vspscc",
+    "PackageRoot"
+  ]
+}
