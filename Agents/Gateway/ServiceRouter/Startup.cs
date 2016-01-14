@@ -8,6 +8,9 @@ using Microsoft.AspNet.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Fabric;
+using System.Fabric.Query;
+using Newtonsoft.Json;
 
 namespace ServiceRouter
 {
@@ -29,14 +32,27 @@ namespace ServiceRouter
             //// Add framework services.
             //services.AddMvcCore()
             //        .AddJsonFormatters();
+
+            services.AddSingleton<FabricClient>(new FabricClient());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, FabricClient client)
         {
             app.Use(async (context, next) =>
             {
-                await context.Response.WriteAsync("Hello from gateway!");
+                var services = new List<ServiceList>();
+                var applications = await client.QueryManager.GetApplicationListAsync();
+                foreach(var application in applications)
+                {
+                    services.Add(await client.QueryManager.GetServiceListAsync(application.ApplicationName));
+                }
+
+                var servicesUrisInCluster = services.SelectMany(x => x.Select(y => y.ServiceName));
+
+                var json = Newtonsoft.Json.JsonConvert.SerializeObject(servicesUrisInCluster, Formatting.Indented);
+
+                await context.Response.WriteAsync("Hello from gateway! We've got:" + json );
             });
         }
     }
