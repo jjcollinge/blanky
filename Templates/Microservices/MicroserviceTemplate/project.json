@@ -4,11 +4,12 @@
         "emitEntryPoint": true
     },
 
-    "dependencies": {
-        "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc1-final",
-        "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc1-final",
-        "Microsoft.ServiceFabric.AspNet.Hosting": "1.0.0-rc1"
-    },
+  "dependencies": {
+    "Microsoft.AspNet.Hosting": "1.0.0-rc2-16161",
+    "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc1-final",
+    "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc1-final",
+    "Microsoft.ServiceFabric.AspNet.Hosting": "1.0.0-rc1"
+  },
 
     "commands": {
         "web": "Microsoft.AspNet.Server.Kestrel"
