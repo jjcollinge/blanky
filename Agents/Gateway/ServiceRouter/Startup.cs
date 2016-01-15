@@ -34,8 +34,6 @@ namespace ServiceRouter
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging();
-            //services.AddCaching();
-            //services.AddSession();
             services.AddSingleton<FabricClient>();
             services.AddSingleton<Resolver>();
         }
@@ -55,8 +53,6 @@ namespace ServiceRouter
 
 
             services.AddLogging();
-            //services.AddCaching();
-            //services.AddSession();
             services.AddSingleton<FabricClient>(client);
             services.AddSingleton<Resolver>();
         }
@@ -79,11 +75,6 @@ namespace ServiceRouter
             ILoggerFactory loggerFactory,
             Resolver resolver)
         {
-            ////Enable session, used to share items between middleware. 
-            ////Todo: review to see if this can be done more effectively using the context object. 
-
-            //app.UseSession();
-
             app.Map("/list/services", subApp =>
             {
                 subApp.Run(async h =>
@@ -119,7 +110,7 @@ namespace ServiceRouter
                 {
                     //Move on if it's not a local connection as this means it's come from outside 
                     //the cluster and 307 redirect wouldn't work
-                    if (context.Connection.IsLocal)
+                    if (!context.Connection.IsLocal)
                     {
                         await next.Invoke();
                     }
@@ -137,6 +128,8 @@ namespace ServiceRouter
 
                 subApp.Use(async (context, next) =>
                 {
+                    //proxy the requests through to the host
+                    //Todo: consider caching Proxymiddlewares by host:port to reduce creation of multiple. 
                     var endpoint = context.Items[SESSION_KEY_SERVICE_ENDPOINT].ToString();
                     var uri = new Uri(endpoint);
                     var proxyMiddleware = new ProxyMiddleware(r => next.Invoke(), new ProxyOptions
@@ -153,9 +146,54 @@ namespace ServiceRouter
             {
 
                 await context.Response.WriteAsync(@"
+                    
+BBBBBBBBBBBBBBBBB   lllllll                                    kkkkkkkk                                    
+B::::::::::::::::B  l:::::l                                    k::::::k                                    
+B::::::BBBBBB:::::B l:::::l                                    k::::::k                                    
+BB:::::B     B:::::Bl:::::l                                    k::::::k                                    
+  B::::B     B:::::B l::::l   aaaaaaaaaaaaa  nnnn  nnnnnnnn     k:::::k    kkkkkkkyyyyyyy           yyyyyyy
+  B::::B     B:::::B l::::l   a::::::::::::a n:::nn::::::::nn   k:::::k   k:::::k  y:::::y         y:::::y 
+  B::::BBBBBB:::::B  l::::l   aaaaaaaaa:::::an::::::::::::::nn  k:::::k  k:::::k    y:::::y       y:::::y  
+  B:::::::::::::BB   l::::l            a::::ann:::::::::::::::n k:::::k k:::::k      y:::::y     y:::::y   
+  B::::BBBBBB:::::B  l::::l     aaaaaaa:::::a  n:::::nnnn:::::n k::::::k:::::k        y:::::y   y:::::y    
+  B::::B     B:::::B l::::l   aa::::::::::::a  n::::n    n::::n k:::::::::::k          y:::::y y:::::y     
+  B::::B     B:::::B l::::l  a::::aaaa::::::a  n::::n    n::::n k:::::::::::k           y:::::y:::::y      
+  B::::B     B:::::B l::::l a::::a    a:::::a  n::::n    n::::n k::::::k:::::k           y:::::::::y       
+BB:::::BBBBBB::::::Bl::::::la::::a    a:::::a  n::::n    n::::nk::::::k k:::::k           y:::::::y        
+B:::::::::::::::::B l::::::la:::::aaaa::::::a  n::::n    n::::nk::::::k  k:::::k           y:::::y         
+B::::::::::::::::B  l::::::l a::::::::::aa:::a n::::n    n::::nk::::::k   k:::::k         y:::::y          
+BBBBBBBBBBBBBBBBB   llllllll  aaaaaaaaaa  aaaa nnnnnn    nnnnnnkkkkkkkk    kkkkkkk       y:::::y           
+                                                                                        y:::::y            
+                                                                                       y:::::y             
+                                                                                      y:::::y              
+                                                                                     y:::::y               
+                                                                                    yyyyyyy                
+                                                                                                                                                                                                            
+
+  __  __       _    _                _____                 _            ______    _          _      
+ |  \/  |     | |  (_)              / ____|               (_)          |  ____|  | |        (_)     
+ | \  / | __ _| | ___ _ __   __ _  | (___   ___ _ ____   ___  ___ ___  | |__ __ _| |__  _ __ _  ___ 
+ | |\/| |/ _` | |/ / | '_ \ / _` |  \___ \ / _ \ '__\ \ / / |/ __/ _ \ |  __/ _` | '_ \| '__| |/ __|
+ | |  | | (_| |   <| | | | | (_| |  ____) |  __/ |   \ V /| | (_|  __/ | | | (_| | |_) | |  | | (__ 
+ |_|  |_|\__,_|_|\_\_|_| |_|\__, | |_____/ \___|_|    \_/ |_|\___\___| |_|_ \__,_|_.__/|_|  |_|\___|
+                             __/ |              | |                | |   | | |                      
+ __      ____ _ _ __ _ __ __|___/ __ _ _ __   __| |   ___ _   _  __| | __| | |_   _                 
+ \ \ /\ / / _` | '__| '_ ` _ \   / _` | '_ \ / _` |  / __| | | |/ _` |/ _` | | | | |                
+  \ V  V / (_| | |  | | | | | | | (_| | | | | (_| | | (__| |_| | (_| | (_| | | |_| |                
+   \_/\_/ \__,_|_|  |_| |_| |_|  \__,_|_| |_|\__,_|  \___|\__,_|\__,_|\__,_|_|\__, |                
+                                                                               __/ |                
+                                                                              |___/                 
+                    Help
+                    ---------------     
+    
                     View Operations:
                         - list/services
                         - list/endpoints
+                    
+                    N.B. To access a service endpoints externally from the cluster use 'RoutedEndpoint'
+                         replace 'localhost:8283' with the External IP/Port and ensure
+                         port forwarding is correctly configured on the load balancer for the service router. 
+
                     Route Operations:
                         - route/{ApplicationName}/{ServiceName}/{HttpMethod}
                     

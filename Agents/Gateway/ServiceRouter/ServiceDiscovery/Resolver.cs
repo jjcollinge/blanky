@@ -111,23 +111,45 @@ namespace ServiceRouter.ServiceDiscovery
             return await DiscoverClusterServices();
         }
 
-        public async Task<Dictionary<Uri, string>> ListServiceEndpoints()
+        public async Task<Dictionary<Uri, EndpointResponseModel>> ListServiceEndpoints()
         {
-            var servicesWithEndpoints = new Dictionary<Uri, string>();
+            var servicesWithEndpoints = new Dictionary<Uri, EndpointResponseModel>();
             foreach (var service in await DiscoverClusterServices())
             {
-                var endpoint = "";
+                EndpointResponseModel endpointResult;
                 if (service.IsStatefulService)
                 {
-                    endpoint = "StatefulService - Need Partition To Determine Endpoint";
+                    endpointResult = new EndpointResponseModel
+                    {
+                        IsSuccess = false,
+                        Details = "StatefulService - Need Partition To Determine Endpoint"
+                    };
                 }
                 else
                 {
-                    var simpleClient = await GetEndpointFromServiceLocation(service);
-                    endpoint = simpleClient.Endpoint;
+                    try
+                    {
+                        var simpleClient = await GetEndpointFromServiceLocation(service);
+                        endpointResult = new EndpointResponseModel
+                        {
+                            IsSuccess = true,
+                            InternalEndpoint = simpleClient.Endpoint,
+                            //Todo: get the port from config. 
+                            RoutedEndpoint = service.FabricAddress.ToString().Replace("fabric:/", "http://localhost:8283/route/")
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning("Failed to get endpoint for stateless service", ex);
+                        endpointResult = new EndpointResponseModel
+                        {
+                            IsSuccess = false,
+                            Details = ex.Message
+                        };
+                    }
                 }
 
-                servicesWithEndpoints.Add(service.FabricAddress, endpoint);
+                servicesWithEndpoints.Add(service.FabricAddress, endpointResult);
             }
 
             return servicesWithEndpoints;
