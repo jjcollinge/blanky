@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "newProfile1": {
+      "executablePath": "C:\\Users\\lawrencegripper\\.dnx\\runtimes\\dnx-clr-win-x86.1.0.0-rc1-update1\\bin\\dnx.exe",
+      "commandLineArgs": " --appbase \"C:\\Users\\lawrencegripper\\Source\\Repos\\Blanky\\Agents\\Gateway\\ServiceRouter.UnitTests\" Microsoft.Dnx.ApplicationHost --port 21608 Microsoft.Dnx.TestHost --port 21627 --parentProcessId 11564"
+    }
+  }
+}

@@ -10,3 +10,7 @@ Setup
 - Clone the repo and open the solution in Visual Studio running as admin.
 - In Visual Studio, go to Options -> NuGet Package Manager -> Package Sources, and add a new package source: https://www.myget.org/F/aspnetvnext/api/v3/index.json.
 - After all the packages are restored, F5 to run the app.
+
+
+Also add nuget feed for xunit
+https://www.myget.org/F/xunit/ 

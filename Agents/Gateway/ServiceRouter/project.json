@@ -7,9 +7,12 @@
     "Microsoft.AspNet.Mvc.Core": "6.0.0-rc2-16770",
     "Microsoft.AspNet.Mvc.Formatters.Json": "6.0.0-rc2-16770",
     "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc2-16236",
+    "Microsoft.Extensions.Caching.Memory": "1.0.0-rc1-final",
     "Microsoft.Extensions.Configuration.FileProviderExtensions": "1.0.0-rc2-15952",
     "Microsoft.Extensions.Configuration.Json": "1.0.0-rc2-15952",
     "Microsoft.Extensions.DependencyInjection": "1.0.0-rc2-15921",
+    "Microsoft.Extensions.Logging": "1.0.0-rc2-15958",
+    "Microsoft.Extensions.Logging.Testing": "1.0.0-rc2-15888", 
     "Microsoft.ServiceFabric": "4.4.87-preview",
     "Microsoft.ServiceFabric.Services": "1.4.87-preview"
   },
