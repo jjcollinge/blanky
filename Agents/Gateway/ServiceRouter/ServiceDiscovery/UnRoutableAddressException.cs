@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace ServiceRouter.Services
+namespace ServiceRouter.ServiceDiscovery
 {
     [Serializable]
     internal class UnRoutableAddressException : Exception

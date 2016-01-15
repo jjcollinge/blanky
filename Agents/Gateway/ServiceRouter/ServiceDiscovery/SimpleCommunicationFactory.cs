@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ServiceRouter.Services
+namespace ServiceRouter.ServiceDiscovery
 {
     public class SimpleEndpointResolverClient : ICommunicationClient
     {

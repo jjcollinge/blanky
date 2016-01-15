@@ -13,4 +13,26 @@ Setup
 
 
 Also add nuget feed for xunit
-https://www.myget.org/F/xunit/ 
+https://www.myget.org/F/xunit/
+
+How it works
+=====================
+
+In service router the 'launchSettings.json' sets the dnx version we want to run 
+and also sets the 'ASPNET_ENV' to debug. 
+
+When started the app runs the 'ServiceRouter' task from the 'project.json' file
+which starts the 'Main' method in 'Program.cs'. 
+
+This method either initialises the 'ServiceRouter' service or, when the env variable 
+is set to debug, starts the web app indepenantly of Service Fabric. This allows
+it to start outside of a full app deploy.  
+
+To handle any Fabric specific calls it uses DI. When started with 'Debug' environment
+ variable ASPNet5 runs the 'startup.cs' and instead of the normal service
+ configuration calls the 'ConfigureDebugServices'
+method. 
+
+This configures the ServiceFabric client, passed into through depenancy injection, 
+to connect as an external client allowing debugging without a full deployment cycle. 
+

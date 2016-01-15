@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using System.Fabric;
 using System.Fabric.Query;
 using Newtonsoft.Json;
+using ServiceRouter.ServiceDiscovery;
 
 namespace ServiceRouter
 {
@@ -29,30 +30,65 @@ namespace ServiceRouter
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //// Add framework services.
-            //services.AddMvcCore()
-            //        .AddJsonFormatters();
+            services.AddLogging();
+            services.AddSingleton<FabricClient>();
+            services.AddSingleton<Resolver>();
+        }
 
-            services.AddSingleton<FabricClient>(new FabricClient());
+        public void ConfigureDebugServices(IServiceCollection services)
+        {
+            var clientName = System.Net.Dns.GetHostName();
+            var client = new FabricClient(new FabricClientSettings
+            {
+                ClientFriendlyName = clientName,
+                ConnectionInitializationTimeout = TimeSpan.FromSeconds(3),
+                KeepAliveInterval = TimeSpan.FromSeconds(15),
+            }, "localhost:19000");
+
+            client.ClientConnected += Client_ClientConnected;
+            client.ClientDisconnected += Client_ClientDisconnected;
+
+
+            services.AddLogging();
+            services.AddSingleton<FabricClient>(client);
+            services.AddSingleton<Resolver>();
+        }
+
+        private void Client_ClientDisconnected(object sender, EventArgs e)
+        {
+            Console.WriteLine("Service Fabric client: Client_ClientDisconnected");
+
+        }
+
+        private void Client_ClientConnected(object sender, EventArgs e)
+        {
+            Console.WriteLine("Service Fabric client: Client_ClientConnected ");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, FabricClient client)
+        public void Configure(
+            IApplicationBuilder app,
+            IHostingEnvironment env,
+            ILoggerFactory loggerFactory,
+            FabricClient client,
+            Resolver resolver)
         {
+
+            app.Map("/listservices", subApp =>
+            {
+                subApp.Run(async h =>
+                {
+                    var respons = await client.QueryManager.GetApplicationListAsync();
+                    var services = await resolver.ListAvailableServices();
+                    var jsonResponse = JsonConvert.SerializeObject(services, Formatting.Indented);
+                    await h.Response.WriteAsync(jsonResponse);
+                });
+            });
+
             app.Use(async (context, next) =>
             {
-                var services = new List<ServiceList>();
-                var applications = await client.QueryManager.GetApplicationListAsync();
-                foreach(var application in applications)
-                {
-                    services.Add(await client.QueryManager.GetServiceListAsync(application.ApplicationName));
-                }
 
-                var servicesUrisInCluster = services.SelectMany(x => x.Select(y => y.ServiceName));
-
-                var json = Newtonsoft.Json.JsonConvert.SerializeObject(servicesUrisInCluster, Formatting.Indented);
-
-                await context.Response.WriteAsync("Hello from gateway! We've got:" + json );
+                await context.Response.WriteAsync("Hello from Blanky Gateway.");
             });
         }
     }

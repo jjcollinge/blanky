@@ -13,6 +13,7 @@
     "Microsoft.Extensions.DependencyInjection": "1.0.0-rc2-15921",
     "Microsoft.Extensions.Logging": "1.0.0-rc2-15958",
     "Microsoft.Extensions.Logging.Testing": "1.0.0-rc2-15888", 
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-15888",
     "Microsoft.ServiceFabric": "4.4.87-preview",
     "Microsoft.ServiceFabric.Services": "1.4.87-preview"
   },
@@ -22,6 +23,9 @@
         "System.Net.Http": "4.0.0.0"
       }
     }
+  },
+  "commands": {
+    "ServiceRouter": "ServiceRouter --debug"
   },
   "exclude": [
     "wwwroot",
