@@ -13,6 +13,7 @@ using System.Fabric.Query;
 using Newtonsoft.Json;
 using ServiceRouter.ServiceDiscovery;
 using Microsoft.AspNet.Proxy;
+using System.Diagnostics;
 
 namespace ServiceRouter
 {
@@ -98,6 +99,18 @@ namespace ServiceRouter
             
             app.Map("/route", subApp =>
             {
+                //Time how long the ServiceRouter takes and add it to headers. 
+                subApp.Use(async (context, next) =>
+                {
+                    var stopwatch = new Stopwatch();
+                    await next.Invoke();
+                    stopwatch.Stop();
+                    if (context.Response.StatusCode == 307)
+                    {
+                        context.Response.Headers.Add("x-blanky-gateway-time", stopwatch.ElapsedMilliseconds.ToString());
+                    }
+                });
+                //Resolve the endpoint for the downstream service
                 subApp.Use(async (context, next) =>
                 {
                     var endpoint = await resolver.ResolveEndpoint(context);
@@ -106,6 +119,7 @@ namespace ServiceRouter
 
                     await next.Invoke();
                 });
+                //Issue a redirect if possible
                 subApp.Use(async (context, next) =>
                 {
                     //Move on if it's not a local connection as this means it's come from outside 
@@ -119,13 +133,13 @@ namespace ServiceRouter
                         var endpoint = context.Items[SESSION_KEY_SERVICE_ENDPOINT].ToString();
 
                         //Return a temporary redirect to the service endpoint
+                       
                         context.Response.StatusCode = 307;
                         context.Response.Headers.Add("Location", endpoint);
-                        
                     }
 
                 });
-
+                //Proxy the request redirect isn't possible
                 subApp.Use(async (context, next) =>
                 {
                     //proxy the requests through to the host
@@ -186,7 +200,7 @@ BBBBBBBBBBBBBBBBB   llllllll  aaaaaaaaaa  aaaa nnnnnn    nnnnnnkkkkkkkk    kkkkk
                     Help
                     ---------------     
     
-                    View Operations:
+                    List Operations:
                         - list/services
                         - list/endpoints
                     
