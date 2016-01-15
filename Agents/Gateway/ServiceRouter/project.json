@@ -15,7 +15,8 @@
     "Microsoft.Extensions.Logging.Testing": "1.0.0-rc2-15888", 
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-15888",
     "Microsoft.ServiceFabric": "4.4.87-preview",
-    "Microsoft.ServiceFabric.Services": "1.4.87-preview"
+    "Microsoft.ServiceFabric.Services": "1.4.87-preview",
+    "Microsoft.AspNet.Proxy": "1.0.0-rc2-16034"
   },
   "frameworks": {
     "dnx451": {

@@ -12,11 +12,14 @@ using System.Fabric;
 using System.Fabric.Query;
 using Newtonsoft.Json;
 using ServiceRouter.ServiceDiscovery;
+using Microsoft.AspNet.Proxy;
 
 namespace ServiceRouter
 {
     public class Startup
     {
+        private const string SESSION_KEY_SERVICE_ENDPOINT = "resolvedEndpoint";
+
         public Startup(IHostingEnvironment env)
         {
             // Set up configuration sources.
@@ -31,6 +34,8 @@ namespace ServiceRouter
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging();
+            //services.AddCaching();
+            //services.AddSession();
             services.AddSingleton<FabricClient>();
             services.AddSingleton<Resolver>();
         }
@@ -50,6 +55,8 @@ namespace ServiceRouter
 
 
             services.AddLogging();
+            //services.AddCaching();
+            //services.AddSession();
             services.AddSingleton<FabricClient>(client);
             services.AddSingleton<Resolver>();
         }
@@ -70,11 +77,14 @@ namespace ServiceRouter
             IApplicationBuilder app,
             IHostingEnvironment env,
             ILoggerFactory loggerFactory,
-            FabricClient client,
             Resolver resolver)
         {
+            ////Enable session, used to share items between middleware. 
+            ////Todo: review to see if this can be done more effectively using the context object. 
 
-            app.Map("/services", subApp =>
+            //app.UseSession();
+
+            app.Map("/list/services", subApp =>
             {
                 subApp.Run(async h =>
                 {
@@ -84,7 +94,7 @@ namespace ServiceRouter
                 });
             });
 
-            app.Map("/endpoints", subApp =>
+            app.Map("/list/endpoints", subApp =>
             {
                 subApp.Run(async h =>
                 {
@@ -94,12 +104,64 @@ namespace ServiceRouter
                 });
             });
 
+            
+            app.Map("/route", subApp =>
+            {
+                subApp.Use(async (context, next) =>
+                {
+                    var endpoint = await resolver.ResolveEndpoint(context);
+                    
+                    context.Items.Add(SESSION_KEY_SERVICE_ENDPOINT, endpoint);
 
+                    await next.Invoke();
+                });
+                subApp.Use(async (context, next) =>
+                {
+                    //Move on if it's not a local connection as this means it's come from outside 
+                    //the cluster and 307 redirect wouldn't work
+                    if (context.Connection.IsLocal)
+                    {
+                        await next.Invoke();
+                    }
+                    else
+                    {
+                        var endpoint = context.Items[SESSION_KEY_SERVICE_ENDPOINT].ToString();
+
+                        //Return a temporary redirect to the service endpoint
+                        context.Response.StatusCode = 307;
+                        context.Response.Headers.Add("Location", endpoint);
+                        
+                    }
+
+                });
+
+                subApp.Use(async (context, next) =>
+                {
+                    var endpoint = context.Items[SESSION_KEY_SERVICE_ENDPOINT].ToString();
+                    var uri = new Uri(endpoint);
+                    var proxyMiddleware = new ProxyMiddleware(r => next.Invoke(), new ProxyOptions
+                    {
+                        Host = uri.Host,
+                        Port = uri.Port.ToString(),
+                        Scheme = uri.Scheme
+                    });
+                    await proxyMiddleware.Invoke(context);
+                });
+            });
 
             app.Use(async (context, next) =>
             {
 
-                await context.Response.WriteAsync("Hello from Blanky Gateway.");
+                await context.Response.WriteAsync(@"
+                    View Operations:
+                        - list/services
+                        - list/endpoints
+                    Route Operations:
+                        - route/{ApplicationName}/{ServiceName}/{HttpMethod}
+                    
+                    N.B. Cluster routing reqeusts originating in a SF cluster will receive Redirect:307 
+                         with the actual service endpoint to avoid bottle neck or throughput issues in the ServiceRouter
+                    ");
             });
         }
     }

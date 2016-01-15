@@ -41,15 +41,15 @@ namespace ServiceRouter.ServiceDiscovery
         private void ParseGatewayUrl(HttpRequest request)
         {
             var url = request.PathBase.Value + request.Path.Value;
-            var pathComponents = request.Path.Value.Split('/');
+            var pathComponents = url.TrimStart('/').Split('/');
 
-            if (pathComponents.Length < 2)
+            if (pathComponents.Length < 2 || pathComponents[0] != "route")
             {
-                throw new UnRoutableAddressException($"Address {url} doesn't match format fabric:/appname/servicename");
+                throw new UnRoutableAddressException($"Address {url} doesn't match format http://localhost/route/appname/servicename");
             }
 
-            ApplicationTypeName = pathComponents[0];
-            ServiceName = pathComponents[1];
+            ApplicationName = pathComponents[1];
+            ServiceName = pathComponents[2];
 
             //Todo: Handle optional params like listenername and version. 
 

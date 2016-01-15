@@ -44,13 +44,25 @@ namespace ServiceRouter.ServiceDiscovery
         {
             this.fabClient = fabClient;
             this.logger = loggerFactory.CreateLogger("Service Resolver");
-            DiscoverClusterServices();
+
+            PopulateServiceCache();
 
             cacheUpdateTimer = new System.Timers.Timer(TimeSpan.FromSeconds(CACHE_REFRESH_TIME_SECONDS).TotalMilliseconds);
-            cacheUpdateTimer.Elapsed += CacheUpdateTimer_Elapsed;
+            cacheUpdateTimer.Elapsed += CacheUpdateTimer_UpdateServiceCache;
         }
 
-        private async void CacheUpdateTimer_Elapsed(object sender, ElapsedEventArgs e)
+        private void PopulateServiceCache()
+        {
+            DiscoverClusterServices().ContinueWith(task =>
+            {
+                if (task.IsCompleted && !task.IsFaulted)
+                {
+                    AddServicesToCache(task.Result);
+                }
+            });
+        }
+
+        private async void CacheUpdateTimer_UpdateServiceCache(object sender, ElapsedEventArgs e)
         {
             try
             {
