@@ -16,18 +16,25 @@ namespace ServiceRouter.ServiceDiscovery
         public ServiceLocation(Application app, Service service)
         {
             ApplicationTypeName = app.ApplicationTypeName;
-            ServiceName = service.ServiceTypeName;
-
+            ApplicationName = app.ApplicationName.ToString().Replace("fabric:/", "");
+            ServiceTypeName = service.ServiceTypeName;
+            ServiceName = service.ServiceName.ToString().Replace($"fabric:/{ApplicationName}/", "");
+            ServiceVersion = service.ServiceManifestVersion;
+            IsStatefulService = service.ServiceKind == ServiceKind.Stateful;
         }
 
+        public bool IsStatefulService { get; set; }
         public string ApplicationTypeName { get; set; }
+        public string ApplicationName { get; set; }
+        public string ServiceTypeName { get; set; }
         public string ServiceName { get; set; }
+        public string ServiceVersion { get; set; }
 
         public Uri FabricAddress
         {
             get
             {
-                return new Uri($"fabric:/{ApplicationTypeName}/{ServiceName}");
+                return new Uri($"fabric:/{ApplicationName}/{ServiceName}");
             }
         }
 

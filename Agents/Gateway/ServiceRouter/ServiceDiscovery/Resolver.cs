@@ -26,10 +26,9 @@ namespace ServiceRouter.ServiceDiscovery
     {
         private const int SERVICE_LOCATION_CACHE_EXPIRY_SECONDS = 30;
         private const int CACHE_REFRESH_TIME_SECONDS = 20;
-        private const string DEFAULT_LISTENER_NAME = "HttpsEndpoint";
+        private const string DEFAULT_LISTENER_NAME = "";
 
-        //private readonly SimpleEndpointResolverClientFactory EndpointResolver = new SimpleEndpointResolverClientFactory();
-        private readonly SimpleEndpointResolverClientFactory EndpointResolver;
+        private readonly SimpleEndpointResolverClientFactory EndpointResolver = new SimpleEndpointResolverClientFactory();
         private readonly MemoryCache ServiceCache = new MemoryCache(new MemoryCacheOptions());
         private readonly MemoryCacheEntryOptions MemoryCacheEntryOptions = new MemoryCacheEntryOptions
         {
@@ -65,14 +64,14 @@ namespace ServiceRouter.ServiceDiscovery
             }
             catch (Exception ex)
             {
-                logger.LogError("Resolver failed to update memory cache with services", ex);   
+                logger.LogError("Resolver failed to update memory cache with services", ex);
             }
 
         }
 
         private void AddServicesToCache(List<ServiceLocation> services)
         {
-            foreach(var service in services)
+            foreach (var service in services)
             {
                 ServiceCache.Set(service.FabricAddress, service);
             }
@@ -100,23 +99,55 @@ namespace ServiceRouter.ServiceDiscovery
             return await DiscoverClusterServices();
         }
 
+        public async Task<Dictionary<Uri, string>> ListServiceEndpoints()
+        {
+            var servicesWithEndpoints = new Dictionary<Uri, string>();
+            foreach (var service in await DiscoverClusterServices())
+            {
+                var endpoint = "";
+                if (service.IsStatefulService)
+                {
+                    endpoint = "StatefulService - Need Partition To Determine Endpoint";
+                }
+                else
+                {
+                    var simpleClient = await GetEndpointFromServiceLocation(service);
+                    endpoint = simpleClient.Endpoint;
+                }
+
+                servicesWithEndpoints.Add(service.FabricAddress, endpoint);
+            }
+
+            return servicesWithEndpoints;
+        }
+
         public async Task<string> ResolveEndpoint(HttpContext request)
         {
+            //Parse the request to get service location
             var targetServiceLocation = new ServiceLocation(request);
 
-            var simpleClient = await EndpointResolver.GetClientAsync(
-                targetServiceLocation.FabricAddress,
-                DEFAULT_LISTENER_NAME,
-                CancellationToken.None);
+            ThrowIfServiceNotPresent(targetServiceLocation);
 
+            SimpleEndpointResolverClient simpleClient = await GetEndpointFromServiceLocation(targetServiceLocation);
+
+            return simpleClient.Endpoint;
+        }
+
+        private void ThrowIfServiceNotPresent(ServiceLocation targetServiceLocation)
+        {
             var cacheServiceEntry = ServiceCache.Get<ServiceLocation>(targetServiceLocation.FabricAddress);
-
             if (cacheServiceEntry == null)
             {
                 throw new FabricServiceNotFoundException($"Service: {targetServiceLocation.FabricAddress} isn't available in the cluster");
             }
+        }
 
-            return simpleClient.Endpoint;
+        private async Task<SimpleEndpointResolverClient> GetEndpointFromServiceLocation(ServiceLocation targetServiceLocation)
+        {
+            return await EndpointResolver.GetClientAsync(
+                targetServiceLocation.FabricAddress,
+                DEFAULT_LISTENER_NAME,
+                CancellationToken.None);
         }
 
         public void Dispose()
@@ -126,5 +157,5 @@ namespace ServiceRouter.ServiceDiscovery
         }
     }
 
-    
+
 }

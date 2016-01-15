@@ -74,16 +74,27 @@ namespace ServiceRouter
             Resolver resolver)
         {
 
-            app.Map("/listservices", subApp =>
+            app.Map("/services", subApp =>
             {
                 subApp.Run(async h =>
                 {
-                    var respons = await client.QueryManager.GetApplicationListAsync();
                     var services = await resolver.ListAvailableServices();
                     var jsonResponse = JsonConvert.SerializeObject(services, Formatting.Indented);
                     await h.Response.WriteAsync(jsonResponse);
                 });
             });
+
+            app.Map("/endpoints", subApp =>
+            {
+                subApp.Run(async h =>
+                {
+                    var services = await resolver.ListServiceEndpoints();
+                    var jsonResponse = JsonConvert.SerializeObject(services, Formatting.Indented);
+                    await h.Response.WriteAsync(jsonResponse);
+                });
+            });
+
+
 
             app.Use(async (context, next) =>
             {
