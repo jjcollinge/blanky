@@ -7,6 +7,11 @@ Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "Microservice", "Microservic
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MicroserviceTemplate", "MicroserviceTemplate\MicroserviceTemplate.xproj", "{CCA637D5-C32A-4CC9-ACEC-99200D4F0116}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{250AA705-A5A4-4DB3-9CD0-4C1E0AE7AA06}"
+	ProjectSection(SolutionItems) = preProject
+		MicroserviceTemplate\global.json = MicroserviceTemplate\global.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -15,6 +15,7 @@ namespace MicroserviceTemplate
     {
         public Startup(IHostingEnvironment env)
         {
+
             // Set up configuration sources.
             Configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json")
                                                       .AddEnvironmentVariables()
@@ -27,8 +28,9 @@ namespace MicroserviceTemplate
         public void ConfigureServices(IServiceCollection services)
         {
             //// Add framework services.
-            //services.AddMvcCore()
-            //        .AddJsonFormatters();
+            services.AddLogging();
+            services.AddMvcCore()
+                    .AddJsonFormatters();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -36,6 +38,7 @@ namespace MicroserviceTemplate
         {
             app.Use(async (context, next) =>
             {
+                loggerFactory.CreateLogger("HelloWorld").LogInformation("hello logging stuff here!");
                 await context.Response.WriteAsync("Hello from gateway!");
             });
         }
