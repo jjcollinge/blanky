@@ -8,6 +8,7 @@ using Microsoft.AspNet.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace MicroserviceTemplate
 {
@@ -36,10 +37,32 @@ namespace MicroserviceTemplate
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            app.Use(async (context, next) =>
+            app.Map("/health", subApp =>
             {
-                loggerFactory.CreateLogger("HelloWorld").LogInformation("hello logging stuff here!");
-                await context.Response.WriteAsync("Hello from gateway!");
+                subApp.Use(async (context, next) =>
+               {
+                   IEnumerable<Type> healthTypes =
+                                    AppDomain
+                                   .CurrentDomain
+                                   .GetAssemblies()
+                                   .SelectMany(assembly => assembly.GetTypes())
+                                   .Where(type => typeof(IHealth).IsAssignableFrom(type)
+                                    && type.IsAbstract == false
+                                    && type.IsInterface == false
+                                    && type.IsGenericTypeDefinition == false);
+
+                   var servicesHealth = new Dictionary<string, string>();
+
+                   foreach (var healthType in healthTypes)
+                   {
+                       var healthService = (IHealth)Activator.CreateInstance(healthType);
+                       var serviceHealth = await healthService.Check();
+                       servicesHealth.Add(healthType.ToString(), serviceHealth);
+                   }
+
+                   var jsonResponse = JsonConvert.SerializeObject(servicesHealth, Formatting.Indented);
+                   await context.Response.WriteAsync(jsonResponse);
+               });
             });
         }
     }
