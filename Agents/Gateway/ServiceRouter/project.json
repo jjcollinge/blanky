@@ -12,8 +12,10 @@
     "Microsoft.Extensions.Configuration.Json": "1.0.0-rc2-15952",
     "Microsoft.Extensions.DependencyInjection": "1.0.0-rc2-15921",
     "Microsoft.Extensions.Logging": "1.0.0-rc2-15958",
-    "Microsoft.Extensions.Logging.Testing": "1.0.0-rc2-15888", 
+    "Microsoft.Extensions.Logging.Testing": "1.0.0-rc2-15888",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-15888",
+    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0-rc2-15952",
+    "Microsoft.Extensions.Configuration": "1.0.0-rc2-15952",
     "Microsoft.ServiceFabric": "4.4.87-preview",
     "Microsoft.ServiceFabric.Services": "1.4.87-preview",
     "Microsoft.AspNet.Proxy": "1.0.0-rc2-16034"
