@@ -20,9 +20,10 @@ namespace MicroserviceTemplate
         IHostingEnvironment _hostingEnv;
         IApplicationEnvironment _appEnv;
 
-        public Startup(IHostingEnvironment env, IApplicationEnvironment appEnv)
+        public Startup(IHostingEnvironment hostingEnv, IApplicationEnvironment appEnv)
         {
-            _hostingEnv = env;
+            _hostingEnv = hostingEnv;
+            _appEnv = appEnv;
 
             // Set up configuration sources.
             Configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json")
@@ -44,6 +45,8 @@ namespace MicroserviceTemplate
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            //TODO: Add OAuth
+
             app.Map("/health", subApp =>
             {
                 subApp.Use(async (context, next) =>
