@@ -17,8 +17,12 @@
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-15888",
     "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0-rc2-15952",
     "Microsoft.Extensions.Configuration": "1.0.0-rc2-15952",
+    "Microsoft.AspNet.Mvc.ApiExplorer": "6.0.0-rc2-16770",
     "Microsoft.ServiceFabric": "4.4.87-preview",
-    "Microsoft.ServiceFabric.Services": "1.4.87-preview"
+    "Microsoft.ServiceFabric.Services": "1.4.87-preview",
+    "Swashbuckle": "6.0.0-rc1-final",
+    "Swashbuckle.SwaggerGen": "6.0.0-rc1-final",
+    "Swashbuckle.SwaggerUi": "6.0.0-rc1-final"
   },
 
   "commands": {

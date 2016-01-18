@@ -9,13 +9,20 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Swashbuckle.SwaggerGen;
+using Microsoft.Extensions.PlatformAbstractions;
+using Swashbuckle.SwaggerGen.Generator;
 
 namespace MicroserviceTemplate
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        IHostingEnvironment _hostingEnv;
+        IApplicationEnvironment _appEnv;
+
+        public Startup(IHostingEnvironment env, IApplicationEnvironment appEnv)
         {
+            _hostingEnv = env;
 
             // Set up configuration sources.
             Configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json")
@@ -30,8 +37,8 @@ namespace MicroserviceTemplate
         {
             //// Add framework services.
             services.AddLogging();
-            services.AddMvcCore()
-                    .AddJsonFormatters();
+            services.AddMvc();
+            services.AddSwaggerGen();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,30 +47,34 @@ namespace MicroserviceTemplate
             app.Map("/health", subApp =>
             {
                 subApp.Use(async (context, next) =>
-               {
-                   IEnumerable<Type> healthTypes =
-                                    AppDomain
-                                   .CurrentDomain
-                                   .GetAssemblies()
-                                   .SelectMany(assembly => assembly.GetTypes())
-                                   .Where(type => typeof(IHealth).IsAssignableFrom(type)
-                                    && type.IsAbstract == false
-                                    && type.IsInterface == false
-                                    && type.IsGenericTypeDefinition == false);
+                {
+                    IEnumerable<Type> healthTypes =
+                                     AppDomain
+                                    .CurrentDomain
+                                    .GetAssemblies()
+                                    .SelectMany(assembly => assembly.GetTypes())
+                                    .Where(type => typeof(IHealth).IsAssignableFrom(type)
+                                     && type.IsAbstract == false
+                                     && type.IsInterface == false
+                                     && type.IsGenericTypeDefinition == false);
 
-                   var servicesHealth = new Dictionary<string, string>();
+                    var servicesHealth = new Dictionary<string, string>();
 
-                   foreach (var healthType in healthTypes)
-                   {
-                       var healthService = (IHealth)Activator.CreateInstance(healthType);
-                       var serviceHealth = await healthService.Check();
-                       servicesHealth.Add(healthType.ToString(), serviceHealth);
-                   }
+                    foreach (var healthType in healthTypes)
+                    {
+                        var healthService = (IHealth)Activator.CreateInstance(healthType);
+                        var serviceHealth = await healthService.Check();
+                        servicesHealth.Add(healthType.ToString(), serviceHealth);
+                    }
 
-                   var jsonResponse = JsonConvert.SerializeObject(servicesHealth, Formatting.Indented);
-                   await context.Response.WriteAsync(jsonResponse);
-               });
+                    var jsonResponse = JsonConvert.SerializeObject(servicesHealth, Formatting.Indented);
+                    await context.Response.WriteAsync(jsonResponse);
+                });
             });
+
+            app.UseSwaggerGen();
+            app.UseSwaggerUi();
+            app.UseMvc();
         }
     }
 }
