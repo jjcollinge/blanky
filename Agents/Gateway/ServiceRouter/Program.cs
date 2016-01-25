@@ -11,7 +11,7 @@ namespace ServiceRouter
 {
     public static class Program
     {
-        private const string ListeningAddress = "http://+:8283";
+        private const string LocalListeningAddress = "http://+:8284";
 
         public static void Main(string[] args)
         {
@@ -29,8 +29,8 @@ namespace ServiceRouter
                                                             .Build();
 
                     webApp.GetAddresses().Clear();
-                    webApp.GetAddresses().Add(ListeningAddress);
-                    Console.WriteLine(ListeningAddress);
+                    webApp.GetAddresses().Add(LocalListeningAddress);
+                    Console.WriteLine(LocalListeningAddress);
                     webApp.Run();
                     Thread.Sleep(Timeout.Infinite);
                     

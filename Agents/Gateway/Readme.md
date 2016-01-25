@@ -1,3 +1,22 @@
+What it does
+=================
+
+The gateway service resolves the endpoints of services inside 
+Service Fabric and, when possible, issues a redirect to the calling 
+client or, when not possible, proxys the traffic. 
+
+Issuing redirects is preferable as it means that the gateway service
+doesn't become a bottleneck. 
+
+The gateway runs on all nodes in the clusters. This enables 
+normal apps with no service fabric awareness to makes simple
+http calls like http://localhost/route/someapp/someservice and 
+have these resolved to the node hosting that service. 
+
+This opens the door to using not just C# to write the Microservices. 
+
+
+
 Setup
 ================
 
