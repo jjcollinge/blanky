@@ -21,8 +21,8 @@ namespace ServiceDeployer.Controllers
     public class ServiceUploadController : Controller
     {
         // Define constants
-        private const string ROOT_DIR = @"C:\temp\"; // @"..\work\";
-        private const string DEPLOY_SCRIPT_PATH = @"deploymentScript.ps1";
+        private const string ROOT_DIR = @"..\work\";
+        private const string DEPLOY_SCRIPT_PATH = @"approot\src\ServiceDeployer\deploymentScript.ps1";
 
         private class Service
         {
@@ -125,33 +125,8 @@ namespace ServiceDeployer.Controllers
             };
         }    
 
-        private string psInvoke(PowerShell ps, out bool success)
-        {
-            Collection<PSObject> results;
-            try
-            {
-                results = ps.Invoke();
-            }
-            catch (Exception e)
-            {
-                success = false;
-                return e.Message;
-            }
-
-            // Compile script results to return to caller
-            StringBuilder stringBuilder = new StringBuilder();
-            foreach(var o in results)
-            {
-                stringBuilder.AppendLine(o.ToString());
-            }
-            success = true;
-            return stringBuilder.ToString();
-        }
-
         private DeployResponse DeployService(Service service)
         {
-            var deploymentScriptPath = ROOT_DIR + DEPLOY_SCRIPT_PATH;
-
             DeployResponse response;
             using (Runspace runspace = RunspaceFactory.CreateRunspace())
             {
@@ -161,7 +136,7 @@ namespace ServiceDeployer.Controllers
                 ps.Runspace = runspace;
 
                 // Run script - this is very blackbox and won't handle ps exceptions
-                ps.AddScript($@".\{deploymentScriptPath} 
+                ps.AddScript($@".\{DEPLOY_SCRIPT_PATH} 
                                                          -appPackagePath {service.AppPackagePath}
                                                          -appName {service.AppName}
                                                          -appType {service.AppType}
@@ -182,6 +157,29 @@ namespace ServiceDeployer.Controllers
 
             // Do some error checking
             return response;
+        }
+
+        private string psInvoke(PowerShell ps, out bool success)
+        {
+            Collection<PSObject> results;
+            try
+            {
+                results = ps.Invoke();
+            }
+            catch (Exception e)
+            {
+                success = false;
+                return e.Message;
+            }
+
+            // Compile script results to return to caller
+            StringBuilder stringBuilder = new StringBuilder();
+            foreach (var o in results)
+            {
+                stringBuilder.AppendLine(o.ToString());
+            }
+            success = true;
+            return stringBuilder.ToString();
         }
     }
 }

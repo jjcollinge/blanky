@@ -1,10 +1,12 @@
 $ErrorActionPreference = "Stop"
 
-##Vars
-$appPackagePath = '.\RedisHost\'
-$appName = 'fabric:/redishost'
-$appType = 'RedisHostAppType'
-$appImageStoreName ='Store\redishost'
+Param (
+    [string]$appPackagePath,
+    [string]$appName,
+    [string]$appType,
+    [string]$appTypeVersion,
+    [string]$appImageStoreName
+)
 
 ##Update this command to deploy to remote cluster as needed. 
 Connect-ServiceFabricCluster localhost:19000
