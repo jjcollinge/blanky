@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using System.Diagnostics;
+using StackExchange.Redis;
 
 namespace ServiceRouter.Middleware
 {
@@ -22,31 +23,44 @@ namespace ServiceRouter.Middleware
 
         public async Task Invoke(HttpContext context)
         {
-            
-            var intendedServiceEndpoint = await resolver.ResolveEndpoint(context);
-            
-            //Time how long the request spends in the gateway
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
+            try
+            {
+                var intendedServiceEndpoint = await resolver.ResolveEndpoint(context);
+                //Log the info out to redis. 
+                IDatabase redisDb = ServiceRouter.RedisConnection.GetDatabase();
+                await redisDb.ListLeftPushAsync(context.Request.Path.Value, $"{context.Request.Method},{context.Request.QueryString.Value},{context.Connection.RemoteIpAddress.ToString()}");
 
-            //If the call is internal to the cluster assume endpoints are reachable 
-            //so issue a redirect. This means no proxying so removes the gateway as a bottleneck. 
-            if (context.Connection.IsLocal)
-            {
-                await Issue307RedirectToService(context, intendedServiceEndpoint);
-            }
-            else
-            {
-                //Stop timing when proxying as interested in gateway time not
-                //how long the downstream service takes to respond. 
+                //Time how long the request spends in the gateway
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
+
+                //If the call is internal to the cluster assume endpoints are reachable 
+                //so issue a redirect. This means no proxying so removes the gateway as a bottleneck. 
+                if (context.Connection.IsLocal)
+                {
+                    await Issue307RedirectToService(context, intendedServiceEndpoint);
+                }
+                else
+                {
+                    //Stop timing when proxying as interested in gateway time not
+                    //how long the downstream service takes to respond. 
+                    stopwatch.Stop();
+
+                    await ProxyRequest(context, intendedServiceEndpoint);
+                }
+
                 stopwatch.Stop();
+                context.Response.Headers.Add("x-blanky-gateway-time", stopwatch.ElapsedMilliseconds.ToString());
 
-                await ProxyRequest(context, intendedServiceEndpoint);
+            }
+            catch (Exception ex)
+            {
+                context.Response.StatusCode = 200;
+                await context.Response.WriteAsync(ex.ToString());
+
             }
 
-            stopwatch.Stop();
-            context.Response.Headers.Add("x-blanky-gateway-time", stopwatch.ElapsedMilliseconds.ToString());
-
+            
             await next.Invoke(context);
         }
 
