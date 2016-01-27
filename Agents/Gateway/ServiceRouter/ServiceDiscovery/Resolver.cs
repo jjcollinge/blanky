@@ -134,6 +134,7 @@ namespace ServiceRouter.ServiceDiscovery
                         {
                             IsSuccess = true,
                             InternalEndpoint = simpleClient.Endpoint,
+                            IsRoutableByGateway = simpleClient.Endpoint.Contains("http"),
                             //Todo: get the port from config. 
                             RoutedEndpoint = service.FabricAddress.ToString().Replace("fabric:/", "http://localhost:8283/route/")
                         };

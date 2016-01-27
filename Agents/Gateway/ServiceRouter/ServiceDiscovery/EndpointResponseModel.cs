@@ -11,5 +11,6 @@ namespace ServiceRouter.ServiceDiscovery
         public string InternalEndpoint { get; set; }
         public bool IsSuccess { get; set; }
         public string Details { get; set; }
+        public bool IsRoutableByGateway { get; set; }
     }
 }
