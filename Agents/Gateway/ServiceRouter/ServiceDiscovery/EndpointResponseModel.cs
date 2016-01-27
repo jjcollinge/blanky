@@ -8,7 +8,8 @@ namespace ServiceRouter.ServiceDiscovery
     public class EndpointResponseModel
     {
         public string RoutedEndpoint { get; set; }
-        public string InternalEndpoint { get; set; }
+        public string[] InternalEndpoint { get; set; }
+        public string InternalEndpointRandom { get; set; }
         public bool IsSuccess { get; set; }
         public string Details { get; set; }
         public bool IsRoutableByGateway { get; set; }

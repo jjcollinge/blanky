@@ -129,12 +129,13 @@ namespace ServiceRouter.ServiceDiscovery
                 {
                     try
                     {
-                        var simpleClient = await GetEndpointFromServiceLocation(service);
+                        var endpoints = await GetInstanceEndpoints(service);
                         endpointResult = new EndpointResponseModel
                         {
                             IsSuccess = true,
-                            InternalEndpoint = simpleClient.Endpoint,
-                            IsRoutableByGateway = simpleClient.Endpoint.Contains("http"),
+                            InternalEndpoint = endpoints,
+                            InternalEndpointRandom = endpoints.OrderBy(x => Guid.NewGuid()).First(), //Todo: optimize this, endure even distribution
+                            IsRoutableByGateway = endpoints.Any(x=>x.Contains("http")),
                             //Todo: get the port from config. 
                             RoutedEndpoint = service.FabricAddress.ToString().Replace("fabric:/", "http://localhost:8283/route/")
                         };
@@ -155,7 +156,6 @@ namespace ServiceRouter.ServiceDiscovery
 
             return servicesWithEndpoints;
         }
-
         public async Task<string> ResolveEndpoint(HttpContext request)
         {
             //Parse the request to get service location
@@ -175,6 +175,16 @@ namespace ServiceRouter.ServiceDiscovery
             {
                 throw new FabricServiceNotFoundException($"Service: {targetServiceLocation.FabricAddress} isn't available in the cluster");
             }
+        }
+
+        private async Task<string[]> GetInstanceEndpoints(ServiceLocation targetServiceLocation)
+        {
+            var client = new FabricClient();
+
+            //Get the endpoint for the service
+            var serviceEndpoint = await client.ServiceManager.ResolveServicePartitionAsync(targetServiceLocation.FabricAddress);
+
+            return serviceEndpoint.Endpoints.Select(x=>x.Address).ToArray();
         }
 
         private async Task<SimpleEndpointResolverClient> GetEndpointFromServiceLocation(ServiceLocation targetServiceLocation)
