@@ -121,7 +121,7 @@ namespace ServiceDeployer.Controllers
 
             return new HttpResponseMessage {
                 StatusCode = response.StatusCode,
-                Content = new StringContent(response.message)
+                ReasonPhrase = response.message
             };
         }    
 
@@ -136,12 +136,7 @@ namespace ServiceDeployer.Controllers
                 ps.Runspace = runspace;
 
                 // Run script - this is very blackbox and won't handle ps exceptions
-                ps.AddScript($@".\{DEPLOY_SCRIPT_PATH} 
-                                                         -appPackagePath {service.AppPackagePath}
-                                                         -appName {service.AppName}
-                                                         -appType {service.AppType}
-                                                         -appTypeVersion {service.AppTypeVersion}
-                                                         -appImageStoreName {service.AppImageStoreName}");
+                ps.AddScript($@".\{DEPLOY_SCRIPT_PATH} -verbose -appPackagePath '{service.AppPackagePath}' -appName '{service.AppName}' -appType '{service.AppType}' -appTypeVersion '{service.AppTypeVersion}' -appImageStoreName '{service.AppImageStoreName}'");
                 bool success = false;
                 string result = psInvoke(ps, out success);
 
@@ -161,10 +156,14 @@ namespace ServiceDeployer.Controllers
 
         private string psInvoke(PowerShell ps, out bool success)
         {
-            Collection<PSObject> results;
+            StringBuilder scriptOutput = new StringBuilder();
+
             try
             {
-                results = ps.Invoke();
+                foreach (var result in ps.Invoke())
+                {
+                    scriptOutput.AppendLine(result.ToString());
+                }
             }
             catch (Exception e)
             {
@@ -172,14 +171,10 @@ namespace ServiceDeployer.Controllers
                 return e.Message;
             }
 
-            // Compile script results to return to caller
-            StringBuilder stringBuilder = new StringBuilder();
-            foreach (var o in results)
-            {
-                stringBuilder.AppendLine(o.ToString());
-            }
+            // Assume that if no exception has thrown that the ps script ran successfully.
+            // Worth adding some error checking on scriptOutput
             success = true;
-            return stringBuilder.ToString();
+            return scriptOutput.ToString();
         }
     }
 }

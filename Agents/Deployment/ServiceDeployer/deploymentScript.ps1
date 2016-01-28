@@ -1,5 +1,4 @@
-$ErrorActionPreference = "Stop"
-
+[cmdletbinding()]
 Param (
     [string]$appPackagePath,
     [string]$appName,
@@ -7,6 +6,14 @@ Param (
     [string]$appTypeVersion,
     [string]$appImageStoreName
 )
+
+Write-Verbose "appPackagePath:$appPackagePath"
+Write-Verbose "appName:$appName"
+Write-Verbose "appType:$appType"
+Write-Verbose "appTypeVersion:$appTypeVersion"
+Write-Verbose "appImageStoreName:$appImageStoreName"
+
+$ErrorActionPreference = "Stop"
 
 ##Update this command to deploy to remote cluster as needed. 
 Connect-ServiceFabricCluster localhost:19000
