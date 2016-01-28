@@ -83,6 +83,25 @@ namespace HealthWatchdog
         }
 
         [NonEvent]
+        public void ServiceMessage(string message, params object[] args)
+        {
+            if (this.IsEnabled())
+            {
+                var service = HealthWatchdog.CurrentInstance;
+                string finalMessage = string.Format(message, args);
+                ServiceMessage(
+                    service.ServiceInitializationParameters.ServiceName.ToString(),
+                    service.ServiceInitializationParameters.ServiceTypeName,
+                    service.ServiceInitializationParameters.InstanceId,
+                    service.ServiceInitializationParameters.PartitionId,
+                    service.ServiceInitializationParameters.CodePackageActivationContext.ApplicationName,
+                    service.ServiceInitializationParameters.CodePackageActivationContext.ApplicationTypeName,
+                    FabricRuntime.GetNodeContext().NodeName,
+                    finalMessage);
+            }
+        }
+
+        [NonEvent]
         public void ServiceMessage(StatefulService service, string message, params object[] args)
         {
             if (this.IsEnabled())

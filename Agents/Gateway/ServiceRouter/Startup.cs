@@ -21,8 +21,6 @@ namespace ServiceRouter
 {
     public class Startup
     {
-
-
         public Startup(IHostingEnvironment env)
         {
             // Set up configuration sources.
@@ -124,19 +122,15 @@ namespace ServiceRouter
 
             app.Map("/route", subApp =>
             {
-
                 subApp.UseMiddleware<GatewayMiddleware>(resolver);
-
             });
 
             app.Map("/health", subApp =>
             {
-
                 subApp.Run(async hrequest =>
                 {
                     await hrequest.Response.WriteAsync("A OK!");
                 });
-
             });
 
             app.Run(async context =>
