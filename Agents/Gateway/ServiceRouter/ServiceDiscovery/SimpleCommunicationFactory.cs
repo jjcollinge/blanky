@@ -13,6 +13,7 @@ namespace ServiceRouter.ServiceDiscovery
         public SimpleEndpointResolverClient()
         {
         }
+
         public string Endpoint { get; set; }
         public bool IsValid { get; set; }
         public ResolvedServicePartition ResolvedServicePartition { get; set; }

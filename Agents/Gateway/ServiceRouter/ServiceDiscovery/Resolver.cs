@@ -11,6 +11,7 @@ using System.Fabric.Query;
 using System.Timers;
 using Microsoft.Extensions.Logging;
 using System.Threading;
+using Newtonsoft.Json;
 
 namespace ServiceRouter.ServiceDiscovery
 {
@@ -85,7 +86,7 @@ namespace ServiceRouter.ServiceDiscovery
         {
             foreach (var service in services)
             {
-                ServiceCache.Set(service.FabricAddress, service);
+                ServiceCache.Set(service.FabricAddress.ToString(), service);
             }
 
 
@@ -122,21 +123,14 @@ namespace ServiceRouter.ServiceDiscovery
                     endpointResult = new EndpointResponseModel
                     {
                         IsSuccess = false,
-                        Details = "StatefulService - Need Partition To Determine Endpoint"
+                        ErrorDetails = "StatefulService - Need Partition To Determine Endpoint"
                     };
                 }
                 else
                 {
                     try
                     {
-                        var simpleClient = await GetEndpointFromServiceLocation(service);
-                        endpointResult = new EndpointResponseModel
-                        {
-                            IsSuccess = true,
-                            InternalEndpoint = simpleClient.Endpoint,
-                            //Todo: get the port from config. 
-                            RoutedEndpoint = service.FabricAddress.ToString().Replace("fabric:/", "http://localhost:8283/route/")
-                        };
+                        endpointResult = await GetEndpointModel(service.FabricAddress.ToString());
                     }
                     catch (Exception ex)
                     {
@@ -144,7 +138,7 @@ namespace ServiceRouter.ServiceDiscovery
                         endpointResult = new EndpointResponseModel
                         {
                             IsSuccess = false,
-                            Details = ex.Message
+                            ErrorDetails = ex.Message
                         };
                     }
                 }
@@ -155,34 +149,69 @@ namespace ServiceRouter.ServiceDiscovery
             return servicesWithEndpoints;
         }
 
+        private async Task<EndpointResponseModel> GetEndpointModel(string fabricAddress)
+        {
+            var endpoints = await GetInstanceEndpoints(fabricAddress);
+            var endpointResult = new EndpointResponseModel
+            {
+                IsSuccess = true,
+                AllInternalEndpoints = endpoints,
+                InternalEndpointRandom = endpoints.OrderBy(x => Guid.NewGuid()).First(), //Todo: optimize this, endure even distribution
+                IsRoutableByGateway = endpoints.Any(x => x.ToLower().Contains("http")),
+                //Todo: get the port from config. 
+                RoutedEndpoint = fabricAddress.ToString().Replace("fabric:/", "http://localhost:8505/route/")
+            };
+            return endpointResult;
+        }
+
         public async Task<string> ResolveEndpoint(HttpContext request)
         {
             //Parse the request to get service location
             var targetServiceLocation = new ServiceLocation(request);
 
-            ThrowIfServiceNotPresent(targetServiceLocation);
+            ThrowIfServiceNotPresent(targetServiceLocation.FabricAddress.ToString());
 
-            SimpleEndpointResolverClient simpleClient = await GetEndpointFromServiceLocation(targetServiceLocation);
+            var possibleEndpoints = await GetEndpointModel(targetServiceLocation.FabricAddress.ToString());
 
-            return simpleClient.Endpoint;
+            return possibleEndpoints.InternalEndpointRandom;
         }
 
-        private void ThrowIfServiceNotPresent(ServiceLocation targetServiceLocation)
+        public async Task<string> ResolveEndpoint(string fabricAddress)
         {
-            var cacheServiceEntry = ServiceCache.Get<ServiceLocation>(targetServiceLocation.FabricAddress);
+
+            ThrowIfServiceNotPresent(fabricAddress);
+
+            var possibleEndpoints = await GetEndpointModel(fabricAddress);
+
+            return possibleEndpoints.InternalEndpointRandom;
+        }
+
+        private void ThrowIfServiceNotPresent(string fabricAddress)
+        {
+            var cacheServiceEntry = ServiceCache.Get<ServiceLocation>(fabricAddress);
             if (cacheServiceEntry == null)
             {
-                throw new FabricServiceNotFoundException($"Service: {targetServiceLocation.FabricAddress} isn't available in the cluster");
+                throw new FabricServiceNotFoundException($"Service: {fabricAddress} isn't available in the cluster");
             }
         }
 
-        private async Task<SimpleEndpointResolverClient> GetEndpointFromServiceLocation(ServiceLocation targetServiceLocation)
+        private async Task<string[]> GetInstanceEndpoints(string fabricAddress)
         {
-            return await EndpointResolver.GetClientAsync(
-                targetServiceLocation.FabricAddress,
-                DEFAULT_LISTENER_NAME,
-                CancellationToken.None);
+
+            //Get the endpoint for the service
+            var serviceEndpoint = await fabClient.ServiceManager.ResolveServicePartitionAsync(new Uri(fabricAddress));
+            var addressesDeserialized = serviceEndpoint.Endpoints.Select(x => JsonConvert.DeserializeObject<EndpointServiceFabricModel>(x.Address));
+            var simpleEndpoints = addressesDeserialized.SelectMany(x => x.Endpoints.Values);
+            return simpleEndpoints.ToArray();
         }
+
+        //private async Task<SimpleEndpointResolverClient> GetEndpointFromServiceLocation(ServiceLocation targetServiceLocation)
+        //{
+        //    return await EndpointResolver.GetClientAsync(
+        //        targetServiceLocation.FabricAddress,
+        //        DEFAULT_LISTENER_NAME,
+        //        CancellationToken.None);
+        //}
 
         public void Dispose()
         {

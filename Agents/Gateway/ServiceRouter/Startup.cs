@@ -15,6 +15,7 @@ using ServiceRouter.ServiceDiscovery;
 using Microsoft.AspNet.Proxy;
 using System.Diagnostics;
 using ServiceRouter.Middleware;
+using StackExchange.Redis;
 
 namespace ServiceRouter
 {
@@ -87,6 +88,24 @@ namespace ServiceRouter
                 });
             });
 
+            app.Map("/list/usage", subApp =>
+            {
+                subApp.Run(async h =>
+                {
+                    IDatabase redisDb = ServiceRouter.RedisConnection.GetDatabase();
+                    
+                    var services = await resolver.ListAvailableServices();
+                    var usageStats = new Dictionary<string, long>();
+                    foreach (var service in services)
+                    {
+                        var hitCount = await redisDb.ListLengthAsync($"/{service.ApplicationName}/{service.ServiceName}");
+                        usageStats.Add(service.FabricAddress.ToString(), hitCount);
+                    }
+                    var jsonResponse = JsonConvert.SerializeObject(usageStats, Formatting.Indented);
+                    await h.Response.WriteAsync(jsonResponse);
+                });
+            });
+
             app.Map("/list/endpoints", subApp =>
             {
                 subApp.Run(async h =>
@@ -99,6 +118,7 @@ namespace ServiceRouter
 
             app.Map("/route", subApp =>
             {
+
                 subApp.UseMiddleware<GatewayMiddleware>(resolver);
 
             });

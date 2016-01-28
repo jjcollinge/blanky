@@ -52,6 +52,7 @@ BBBBBBBBBBBBBBBBB   llllllll  aaaaaaaaaa  aaaa nnnnnn    nnnnnnkkkkkkkk    kkkkk
                     List Operations:
                         - list/services
                         - list/endpoints
+                        - list/usage
                     
                     N.B. To access a service endpoints externally from the cluster use 'RoutedEndpoint'
                          replace 'localhost:8283' with the External IP/Port and ensure

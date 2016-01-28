@@ -18,7 +18,9 @@
     "Microsoft.Extensions.Configuration": "1.0.0-rc2-15952",
     "Microsoft.ServiceFabric": "4.4.87-preview",
     "Microsoft.ServiceFabric.Services": "1.4.87-preview",
-    "Microsoft.AspNet.Proxy": "1.0.0-rc2-16034"
+    "Microsoft.AspNet.Proxy": "1.0.0-rc2-16034",
+    "StackExchange.Redis": "1.0.488",
+    "Newtonsoft.Json": "8.0.2"
   },
   "frameworks": {
     "dnx451": {

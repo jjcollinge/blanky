@@ -6,11 +6,25 @@ using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.AspNet.Hosting;
 using Microsoft.ServiceFabric.AspNet;
+using StackExchange.Redis;
+using System.Threading;
+using System.Net.Http;
+using Newtonsoft.Json;
+using ServiceRouter.ServiceDiscovery;
+using System.Fabric;
 
 namespace ServiceRouter
 {
     public class ServiceRouter : StatelessService
     {
+        private static ConnectionMultiplexer redisConnection;
+
+        public static ConnectionMultiplexer RedisConnection
+        {
+            get { return redisConnection; }
+            set { redisConnection = value; }
+        }
+
         protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
         {
             // Build an ASP.NET 5 web application that serves as the communication listener.
@@ -24,6 +38,24 @@ namespace ServiceRouter
             webApp.GetAddresses().Add(listeningAddress);
 
             return new[] { new ServiceInstanceListener(_ => new AspNetCommunicationListener(webApp)) };
+        }
+
+        protected override async Task RunAsync(CancellationToken cancellationToken)
+        {
+            Resolver resolver = new Resolver(new FabricClient(), new Microsoft.Extensions.Logging.LoggerFactory());
+
+            RedisConnection = ConnectionMultiplexer.Connect(await resolver.ResolveEndpoint("fabric:/BlankyGateway/RedisWrapper"));
+
+            await base.RunAsync(cancellationToken);
+        }
+
+        private static async Task<string> DiscoverService(string fabricAddress)
+        {
+            HttpClient client = new HttpClient();
+            var endpointApiResponse = await client.GetStringAsync("http://localhost:8283/list/endpoints");
+            var deserializedApiResponse = JsonConvert.DeserializeObject<Dictionary<String, EndpointResponseModel>>(endpointApiResponse);
+            var redisEndpoint = deserializedApiResponse[fabricAddress].InternalEndpointRandom;
+            return redisEndpoint;
         }
     }
 }
