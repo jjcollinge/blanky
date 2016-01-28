@@ -8,11 +8,14 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using System.Diagnostics;
 using StackExchange.Redis;
+using System.Fabric;
 
 namespace ServiceRouter.Middleware
 {
     public class GatewayMiddleware
     {
+
+
         private readonly RequestDelegate next;
         private readonly Resolver resolver;
         public GatewayMiddleware(RequestDelegate next, Resolver resolver)
@@ -25,10 +28,31 @@ namespace ServiceRouter.Middleware
         {
             try
             {
+                //Find out what we're routing too. 
                 var intendedServiceEndpoint = await resolver.ResolveEndpoint(context);
+
                 //Log the info out to redis. 
-                IDatabase redisDb = ServiceRouter.RedisConnection.GetDatabase();
-                await redisDb.ListLeftPushAsync(context.Request.Path.Value, $"{context.Request.Method},{context.Request.QueryString.Value},{context.Connection.RemoteIpAddress.ToString()}");
+                try
+                {
+                    if (ServiceRouter.RedisConnection == null)
+                    {
+                        ServiceRouter.RedisConnection = ConnectionMultiplexer.Connect(await resolver.ResolveEndpoint(Constants.RedisServiceAddress));
+                    }
+
+                    IDatabase redisDb = ServiceRouter.RedisConnection.GetDatabase();
+                    await redisDb.ListLeftPushAsync(context.Request.Path.Value, $"{context.Request.Method},{context.Request.QueryString.Value},{context.Connection.RemoteIpAddress.ToString()}");
+
+                }
+                catch (FabricServiceNotFoundException ex)
+                {
+                    //Todo: log exception. 
+                }
+                catch (Exception ex)
+                {
+                    //Other exception occurred. Swallow as logging should error shouldn't cause routing to fail. 
+                }
+
+
 
                 //Time how long the request spends in the gateway
                 var stopwatch = new Stopwatch();

@@ -112,9 +112,9 @@ namespace ServiceRouter.ServiceDiscovery
             return await DiscoverClusterServices();
         }
 
-        public async Task<Dictionary<Uri, EndpointResponseModel>> ListServiceEndpoints()
+        public async Task<List<EndpointResponseModel>> ListServiceEndpoints()
         {
-            var servicesWithEndpoints = new Dictionary<Uri, EndpointResponseModel>();
+            var servicesWithEndpoints = new List<EndpointResponseModel>();
             foreach (var service in await DiscoverClusterServices())
             {
                 EndpointResponseModel endpointResult;
@@ -122,6 +122,7 @@ namespace ServiceRouter.ServiceDiscovery
                 {
                     endpointResult = new EndpointResponseModel
                     {
+                        FabricAddress = service.FabricAddress.ToString(),
                         IsSuccess = false,
                         ErrorDetails = "StatefulService - Need Partition To Determine Endpoint"
                     };
@@ -143,7 +144,7 @@ namespace ServiceRouter.ServiceDiscovery
                     }
                 }
 
-                servicesWithEndpoints.Add(service.FabricAddress, endpointResult);
+                servicesWithEndpoints.Add(endpointResult);
             }
 
             return servicesWithEndpoints;
@@ -154,6 +155,7 @@ namespace ServiceRouter.ServiceDiscovery
             var endpoints = await GetInstanceEndpoints(fabricAddress);
             var endpointResult = new EndpointResponseModel
             {
+                FabricAddress = fabricAddress,
                 IsSuccess = true,
                 AllInternalEndpoints = endpoints,
                 InternalEndpointRandom = endpoints.OrderBy(x => Guid.NewGuid()).First(), //Todo: optimize this, endure even distribution
@@ -200,6 +202,7 @@ namespace ServiceRouter.ServiceDiscovery
 
             //Get the endpoint for the service
             var serviceEndpoint = await fabClient.ServiceManager.ResolveServicePartitionAsync(new Uri(fabricAddress));
+            
             var addressesDeserialized = serviceEndpoint.Endpoints.Select(x => JsonConvert.DeserializeObject<EndpointServiceFabricModel>(x.Address));
             var simpleEndpoints = addressesDeserialized.SelectMany(x => x.Endpoints.Values);
             return simpleEndpoints.ToArray();
