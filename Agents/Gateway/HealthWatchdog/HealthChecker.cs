@@ -71,15 +71,28 @@ namespace HealthWatchdog
                     new Uri(service.Key),
                     new HealthInformation(
                         "Blanky-HealthWatchdog",
-                        $"Healthendpoint didn't return 200ok on endpoint {endpoint}",
+                        $"Healthendpoint ERROR returned {httpResponse.StatusCode.ToString()} on endpoint {endpoint}",
                         healthState));
 
                 Client.HealthManager.ReportHealth(serviceHealthReport);
             }
             else
             {
+
                 var responseBody = await httpResponse.Content.ReadAsStringAsync();
                 Logger.LogInformation($"OK: {service.Key} on endpoint {endpoint} responded with '{responseBody}'");
+
+                HealthState healthState = HealthState.Ok;
+
+                // Send report around the service health
+                var serviceHealthReport = new ServiceHealthReport(
+                    new Uri(service.Key),
+                    new HealthInformation(
+                        "Blanky-HealthWatchdog",
+                        $"Healthendpoint OK returned 200 on endpoint {endpoint}",
+                        healthState));
+
+                Client.HealthManager.ReportHealth(serviceHealthReport);
             }
         }
 
