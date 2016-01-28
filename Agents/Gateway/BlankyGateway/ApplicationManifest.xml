@@ -1,9 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ApplicationManifest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ApplicationTypeName="BlankyGatewayType" ApplicationTypeVersion="1.0.0" xmlns="http://schemas.microsoft.com/2011/01/fabric">
    <Parameters>
+      <Parameter Name="HealthWatchdog_InstanceCount" DefaultValue="-1" />
       <Parameter Name="RedisWrapper_InstanceCount" DefaultValue="-1" />
       <Parameter Name="ServiceRouter_InstanceCount" DefaultValue="-1" />
    </Parameters>
+   <ServiceManifestImport>
+      <ServiceManifestRef ServiceManifestName="HealthWatchdogPkg" ServiceManifestVersion="1.0.0" />
+      <ConfigOverrides />
+   </ServiceManifestImport>
    <ServiceManifestImport>
       <ServiceManifestRef ServiceManifestName="RedisWrapperPkg" ServiceManifestVersion="1.0.0" />
       <ConfigOverrides />
@@ -13,6 +18,11 @@
       <ConfigOverrides />
    </ServiceManifestImport>
    <DefaultServices>
+      <Service Name="HealthWatchdog">
+         <StatelessService ServiceTypeName="HealthWatchdogType" InstanceCount="[HealthWatchdog_InstanceCount]">
+            <SingletonPartition />
+         </StatelessService>
+      </Service>
       <Service Name="RedisWrapper">
          <StatelessService ServiceTypeName="RedisWrapperType" InstanceCount="[RedisWrapper_InstanceCount]">
             <SingletonPartition />

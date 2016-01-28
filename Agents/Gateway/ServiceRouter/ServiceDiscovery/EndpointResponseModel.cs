@@ -7,6 +7,7 @@ namespace ServiceRouter.ServiceDiscovery
 {
     public class EndpointResponseModel
     {
+        public string FabricAddress { get; set; }
         public bool IsSuccess { get; set; }
         public string InternalEndpointRandom { get; set; }
         public string[] AllInternalEndpoints { get; set; }

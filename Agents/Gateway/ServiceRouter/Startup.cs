@@ -76,7 +76,8 @@ namespace ServiceRouter
             IApplicationBuilder app,
             IHostingEnvironment env,
             ILoggerFactory loggerFactory,
-            Resolver resolver)
+            Resolver resolver,
+            FabricClient fabClient)
         {
             app.Map("/list/services", subApp =>
             {
@@ -92,8 +93,13 @@ namespace ServiceRouter
             {
                 subApp.Run(async h =>
                 {
+                    if (ServiceRouter.RedisConnection == null)
+                    {
+                        ServiceRouter.RedisConnection = ConnectionMultiplexer.Connect(await resolver.ResolveEndpoint(Constants.RedisServiceAddress));
+                    }
+
                     IDatabase redisDb = ServiceRouter.RedisConnection.GetDatabase();
-                    
+
                     var services = await resolver.ListAvailableServices();
                     var usageStats = new Dictionary<string, long>();
                     foreach (var service in services)
@@ -111,7 +117,7 @@ namespace ServiceRouter
                 subApp.Run(async h =>
                 {
                     var services = await resolver.ListServiceEndpoints();
-                    var jsonResponse = JsonConvert.SerializeObject(services, Formatting.Indented);
+                    var jsonResponse = JsonConvert.SerializeObject(new { Results = services }, Formatting.Indented);
                     await h.Response.WriteAsync(jsonResponse);
                 });
             });
@@ -120,6 +126,17 @@ namespace ServiceRouter
             {
 
                 subApp.UseMiddleware<GatewayMiddleware>(resolver);
+
+            });
+
+            app.Map("/health", subApp =>
+            {
+
+                subApp.Run(async hrequest =>
+                {
+                    hrequest.Response.StatusCode = 500;
+                    await hrequest.Response.WriteAsync("Oh Noes .. it's foobar");
+                });
 
             });
 

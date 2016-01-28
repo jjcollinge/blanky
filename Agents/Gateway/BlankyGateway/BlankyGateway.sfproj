@@ -14,6 +14,7 @@
     <None Include="Scripts\Deploy-FabricApplication.ps1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\HealthWatchdog\HealthWatchdog.csproj" />
     <ProjectReference Include="..\RedisWrapper\RedisWrapper.csproj" />
     <ProjectReference Include="..\ServiceRouter\ServiceRouter.xproj" />
   </ItemGroup>

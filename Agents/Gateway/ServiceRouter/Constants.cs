@@ -7,6 +7,7 @@ namespace ServiceRouter
 {
     public class Constants
     {
+        public const string RedisServiceAddress = "fabric:/BlankyGateway/RedisWrapper";
         public const string SESSION_KEY_SERVICE_ENDPOINT = "resolvedEndpoint";
         public const string HelpText = @"
                     

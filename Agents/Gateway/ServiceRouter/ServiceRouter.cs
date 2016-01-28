@@ -17,14 +17,8 @@ namespace ServiceRouter
 {
     public class ServiceRouter : StatelessService
     {
-        private static ConnectionMultiplexer redisConnection;
 
-        public static ConnectionMultiplexer RedisConnection
-        {
-            get { return redisConnection; }
-            set { redisConnection = value; }
-        }
-
+        public static ConnectionMultiplexer RedisConnection;
         protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
         {
             // Build an ASP.NET 5 web application that serves as the communication listener.
@@ -42,9 +36,7 @@ namespace ServiceRouter
 
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
-            Resolver resolver = new Resolver(new FabricClient(), new Microsoft.Extensions.Logging.LoggerFactory());
 
-            RedisConnection = ConnectionMultiplexer.Connect(await resolver.ResolveEndpoint("fabric:/BlankyGateway/RedisWrapper"));
 
             await base.RunAsync(cancellationToken);
         }
