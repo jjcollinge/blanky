@@ -134,8 +134,7 @@ namespace ServiceRouter
 
                 subApp.Run(async hrequest =>
                 {
-                    hrequest.Response.StatusCode = 500;
-                    await hrequest.Response.WriteAsync("Oh Noes .. it's foobar");
+                    await hrequest.Response.WriteAsync("A OK!);
                 });
 
             });
