@@ -134,7 +134,7 @@ namespace ServiceRouter
 
                 subApp.Run(async hrequest =>
                 {
-                    await hrequest.Response.WriteAsync("A OK!);
+                    await hrequest.Response.WriteAsync("A OK!");
                 });
 
             });
