@@ -99,11 +99,12 @@ namespace ServiceDeployer.Controllers
             var appManifest = (ApplicationManifest)serialiser.Deserialize(filestream);
 
             var appName = $"fabric:/{appManifest.ApplicationTypeName}_{appManifest.ApplicationTypeVersion}";
+            var appPackagePath = Directory.GetParent(appManifestFilePath).FullName;
 
             Service service = new Service
             {
                 AppName = appName,
-                AppPackagePath = appManifestFilePath,
+                AppPackagePath = appPackagePath,
                 AppImageStoreName = $"Store\\{appManifest.ApplicationTypeName}",
                 AppType = appManifest.ApplicationTypeName,
                 AppTypeVersion = appManifest.ApplicationTypeVersion
@@ -117,7 +118,7 @@ namespace ServiceDeployer.Controllers
                     4. Clean up any existing application data
                     5. Create an instance of the application type
             */
-            var response = DeployService(service);
+            var response = deployService(service);
 
             return new HttpResponseMessage {
                 StatusCode = response.StatusCode,
@@ -125,7 +126,7 @@ namespace ServiceDeployer.Controllers
             };
         }    
 
-        private DeployResponse DeployService(Service service)
+        private DeployResponse deployService(Service service)
         {
             DeployResponse response;
             using (Runspace runspace = RunspaceFactory.CreateRunspace())
@@ -137,8 +138,8 @@ namespace ServiceDeployer.Controllers
 
                 // Run script - this is very blackbox and won't handle ps exceptions
                 ps.AddScript($@".\{DEPLOY_SCRIPT_PATH} -verbose -appPackagePath '{service.AppPackagePath}' -appName '{service.AppName}' -appType '{service.AppType}' -appTypeVersion '{service.AppTypeVersion}' -appImageStoreName '{service.AppImageStoreName}'");
-                bool success = false;
-                string result = psInvoke(ps, out success);
+                bool success;
+                string result = invokeDeploymentScript(ps, out success);
 
                 if (!success)
                 {
@@ -154,26 +155,37 @@ namespace ServiceDeployer.Controllers
             return response;
         }
 
-        private string psInvoke(PowerShell ps, out bool success)
+        private string invokeDeploymentScript(PowerShell ps, out bool success)
         {
             StringBuilder scriptOutput = new StringBuilder();
+            success = false;
+
+            // Invoke the deployment script, compile ouput and return to caller
 
             try
             {
-                foreach (var result in ps.Invoke())
-                {
-                    scriptOutput.AppendLine(result.ToString());
-                }
+                ps.Invoke();
             }
             catch (Exception e)
             {
-                success = false;
-                return e.Message;
+                scriptOutput.AppendLine($"EXCEPTION: {e.Message}");
+                if (success == true) success = false;
+            }
+
+            foreach(var err in ps.Streams.Error)
+            {
+                scriptOutput.AppendLine($"ERROR: {err.ToString()}");
+                if (success == true) success = false;
+            } 
+
+            foreach (var line in ps.Streams.Verbose)
+            {
+                scriptOutput.AppendLine($"VERBOSE: {line.ToString()}");
+                if (success != true) success = true;
             }
 
             // Assume that if no exception has thrown that the ps script ran successfully.
             // Worth adding some error checking on scriptOutput
-            success = true;
             return scriptOutput.ToString();
         }
     }
