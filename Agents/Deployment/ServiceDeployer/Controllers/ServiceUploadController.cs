@@ -47,7 +47,7 @@ namespace ServiceDeployer.Controllers
             HttpRequest req = this.Request;
             HttpResponseMessage res;
 
-            if(isValidRequest(req))
+            if(requestHasZip(req))
             {
                 string zippedUnzipPath = await extractZippedService(req);
                 Service service = loadService(zippedUnzipPath);
@@ -90,7 +90,6 @@ namespace ServiceDeployer.Controllers
                 if (!success)
                 {
                     res = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-
                 }
                 else
                 {
@@ -160,7 +159,7 @@ namespace ServiceDeployer.Controllers
             return zippedUnzipPath;
         }
 
-        private bool isValidRequest(HttpRequest req)
+        private bool requestHasZip(HttpRequest req)
         {
             bool isValid = true;
 
