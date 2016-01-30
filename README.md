@@ -1,17 +1,14 @@
 Blanky
 ---------------
 
-Provides HTTP REST endpoints for developing on Azure Service Fabric
+Enrich Azure Service Fabric for developers
 
 Principals
 ---------------
 
-- easy to use
-- nuget based install (overlays existing templates rather than rewrite - like polyfill in js)
-- highlight cool but unapproachable SF features (naming service, named service instances, watchdogs etc)
+- Make using service fabric services simple
+- Nuget based install (overlays existing templates rather than rewrite - like polyfill in js)
+- Highlight cool but unapproachable SF features (naming service, named service instances, watchdogs etc)
+- Extend the service fabric REST API to add more features (deployment)
+- Provide a best practice template which adds rich features like swagger to each of your services
 
-
-**Update this README.md file**.
-
- A README.md file is intended to quickly orient readers to what your project can do.
- [Learn more](http://go.microsoft.com/fwlink/p/?LinkId=524306) about Markdown.
