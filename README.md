@@ -1,7 +1,7 @@
 Blanky
 ---------------
 
-Making SF easy for http based microservives. 
+Provides HTTP REST endpoints for developing on Azure Service Fabric
 
 Principals
 ---------------
