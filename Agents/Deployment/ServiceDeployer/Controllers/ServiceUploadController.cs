@@ -33,17 +33,6 @@ namespace ServiceDeployer.Controllers
             public string AppImageStoreName { get; set; }
         }
 
-        private class DeployResponse
-        {
-            public DeployResponse(HttpStatusCode code, string msg)
-            {
-                this.StatusCode = code;
-                this.message = msg;
-            }
-            public HttpStatusCode StatusCode { get; set; }
-            public string message { get; set; }
-        }
-
         // GET: api/ServiceUpload
         [HttpGet]
         public IEnumerable<string> Get()
@@ -56,18 +45,97 @@ namespace ServiceDeployer.Controllers
         public async Task<HttpResponseMessage> Post()
         {
             HttpRequest req = this.Request;
+            HttpResponseMessage res;
 
-            if (req == null)
+            if(isValidRequest(req))
             {
-                return new HttpResponseMessage(HttpStatusCode.BadRequest);
-            }
+                string zippedUnzipPath = await extractZippedService(req);
+                Service service = loadService(zippedUnzipPath);
 
-            IFormFile zippedFile = req.Form.Files.First();
+                /*
+                    The deployment script is responsible for:
+                        1. Connecting to the cluster
+                        2. Copying the application to the cluster's image store
+                        3. Test and register the application type with the cluster
+                        4. Clean up any existing application data
+                        5. Create an instance of the application type
+                */
+                res = deployService(service);
+            }
+            else
+            {
+                res = new HttpResponseMessage(HttpStatusCode.BadRequest);
+                res.ReasonPhrase = "No file was provided";
+            }
             
-            if(zippedFile == null)
+            return res;
+        }
+
+        private HttpResponseMessage deployService(Service service)
+        {
+            HttpResponseMessage res;
+            using (Runspace runspace = RunspaceFactory.CreateRunspace())
             {
-                return new HttpResponseMessage(HttpStatusCode.BadRequest);
+                // Prepare Powershell enviroment
+                runspace.Open();
+                PowerShell ps = PowerShell.Create();
+                ps.Runspace = runspace;
+
+                // Run deployment script
+                ps.AddScript($@".\{DEPLOY_SCRIPT_PATH} -verbose -appPackagePath '{service.AppPackagePath}' -appName '{service.AppName}' -appType '{service.AppType}' -appTypeVersion '{service.AppTypeVersion}' -appImageStoreName '{service.AppImageStoreName}'");
+                bool success;
+                string result = invokeDeploymentScript(ps, out success);
+
+                // Set appropriate status code
+                if (!success)
+                {
+                    res = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
+                }
+                else
+                {
+                    res = new HttpResponseMessage(HttpStatusCode.OK);
+                }
+                res.ReasonPhrase = result;
             }
+
+            return res;
+        }
+
+        private static Service loadService(string zippedUnzipPath)
+        {
+            // Recursively search the FS for the application manifest file
+            var appManifestFilesSearchResults = Directory.GetFiles(zippedUnzipPath, "ApplicationManifest.xml", SearchOption.AllDirectories);
+            var appManifestFilePath = appManifestFilesSearchResults.Single();
+
+            ApplicationManifest appManifest = getAppManifest(appManifestFilePath);
+
+            var appName = $"fabric:/{appManifest.ApplicationTypeName}_{appManifest.ApplicationTypeVersion}";
+            var appPackagePath = Directory.GetParent(appManifestFilePath).FullName;
+
+            Service service = new Service
+            {
+                AppName = appName,
+                AppPackagePath = appPackagePath,
+                AppImageStoreName = $"Store\\{appManifest.ApplicationTypeName}",
+                AppType = appManifest.ApplicationTypeName,
+                AppTypeVersion = appManifest.ApplicationTypeVersion
+            };
+            return service;
+        }
+
+        private static ApplicationManifest getAppManifest(string appManifestFilePath)
+        {
+            // Load the application manifest and find the required information
+            XmlSerializer serialiser = new XmlSerializer(typeof(ApplicationManifest));
+            FileStream filestream = new FileStream(appManifestFilePath, FileMode.Open);
+            var appManifest = (ApplicationManifest)serialiser.Deserialize(filestream);
+            return appManifest;
+        }
+
+        private static async Task<string> extractZippedService(HttpRequest req)
+        {
+            IFormFile zippedFile = req.Form.Files.First();
 
             // Save the compressed zip to the local machine
             var zipGuid = Guid.NewGuid().ToString();
@@ -89,70 +157,24 @@ namespace ServiceDeployer.Controllers
                 zip.Close();
             }
 
-            // Recursively search the FS for the application manifest file
-            var appManifestFilesSearchResults = Directory.GetFiles(zippedUnzipPath, "ApplicationManifest.xml", SearchOption.AllDirectories);
-            var appManifestFilePath = appManifestFilesSearchResults.Single();
+            return zippedUnzipPath;
+        }
 
-            // Load the application manifest and find the required information
-            XmlSerializer serialiser = new XmlSerializer(typeof(ApplicationManifest));
-            FileStream filestream = new FileStream(appManifestFilePath, FileMode.Open);
-            var appManifest = (ApplicationManifest)serialiser.Deserialize(filestream);
-
-            var appName = $"fabric:/{appManifest.ApplicationTypeName}_{appManifest.ApplicationTypeVersion}";
-            var appPackagePath = Directory.GetParent(appManifestFilePath).FullName;
-
-            Service service = new Service
-            {
-                AppName = appName,
-                AppPackagePath = appPackagePath,
-                AppImageStoreName = $"Store\\{appManifest.ApplicationTypeName}",
-                AppType = appManifest.ApplicationTypeName,
-                AppTypeVersion = appManifest.ApplicationTypeVersion
-            };
-
-            /*
-                The deployment script is responsible for:
-                    1. Connecting to the cluster
-                    2. Copying the application to the cluster's image store
-                    3. Test and register the application type with the cluster
-                    4. Clean up any existing application data
-                    5. Create an instance of the application type
-            */
-            var response = deployService(service);
-
-            return new HttpResponseMessage {
-                StatusCode = response.StatusCode,
-                ReasonPhrase = response.message
-            };
-        }    
-
-        private DeployResponse deployService(Service service)
+        private bool isValidRequest(HttpRequest req)
         {
-            DeployResponse response;
-            using (Runspace runspace = RunspaceFactory.CreateRunspace())
+            bool isValid = true;
+
+            if (req == null)
             {
-                // Prepare Powershell enviroment
-                runspace.Open();
-                PowerShell ps = PowerShell.Create();
-                ps.Runspace = runspace;
-
-                // Run script - this is very blackbox and won't handle ps exceptions
-                ps.AddScript($@".\{DEPLOY_SCRIPT_PATH} -verbose -appPackagePath '{service.AppPackagePath}' -appName '{service.AppName}' -appType '{service.AppType}' -appTypeVersion '{service.AppTypeVersion}' -appImageStoreName '{service.AppImageStoreName}'");
-                bool success;
-                string result = invokeDeploymentScript(ps, out success);
-
-                if (!success)
-                {
-                    response = new DeployResponse(HttpStatusCode.InternalServerError, result);
-                }
-                else
-                {
-                    response = new DeployResponse(HttpStatusCode.OK, result);
-                }
+                isValid = false;
             }
 
-            // Do some error checking
-            return response;
+            if (req.Form.Files.First() == null)
+            {
+                isValid = false;
+            }
+
+            return isValid;
         }
 
         private string invokeDeploymentScript(PowerShell ps, out bool success)
@@ -161,6 +183,8 @@ namespace ServiceDeployer.Controllers
             success = false;
 
             // Invoke the deployment script, compile ouput and return to caller
+            // If an exception or an error is returned, success will be set to false
+            // All output from script should be verbose
 
             try
             {
