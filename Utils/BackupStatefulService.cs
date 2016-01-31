@@ -20,38 +20,31 @@ namespace Blanky.Utils
                             int backupInterval)
         {
             // Must be fully intialised on creation
-            _blobStorageKey = blobStorageKey;
-            _blobName = blobName;
-            _containerName = containerName;
-            _backupInterval = backupInterval;
+            BlobStorageKey = blobStorageKey;
+            BlobName = blobName;
+            ContainerName = containerName;
+            BackupInterval = backupInterval;
         }
 
-        // READ-ONLY
-        public int BlobStorageKey { get { return _blobStorageKey; } private set; }
-        public int ContainerName { get { return _containerName; } private set; }
-        public int BlobName { get { return _blobName; } private set; }
-        public int BackupInterval { get { return _backupInterval; } private set; }
-
-        // Data members
-        private string _blobStorageKey;
-        private string _containerName;
-        private string _blobName;
-        private int _backupInterval;
+        public string BlobStorageKey { get; set; }
+        public string BlobName { get; set; }
+        public string ContainerName { get; set; }
+        public int BackupInterval { get; set; }
     }
 
     class BackupUtility
     {
         private Timer _timer;
         private IReliableStateManager _stateManager;
-        private BackupConfig _config;
+        private BackupConfig _backupConfig;
 
         public BackupUtility(ref IReliableStateManager stateManager, BackupConfig config, ElapsedEventHandler callback)
         {
             _stateManager = stateManager;
-            _config = config;
+            _backupConfig = config;
             _timer = new Timer();
             _timer.Elapsed += callback;
-            _timer.Interval = _config.BackupInterval;
+            _timer.Interval = _backupConfig.BackupInterval;
         }
 
         private async void OnTimerFired(object sender, EventArgs e)
@@ -60,11 +53,11 @@ namespace Blanky.Utils
             await _stateManager.BackupAsync(backupToBlob);
         }
 
-        private CloudBlockBlob getBlockBlob()
+        private CloudBlockBlob getBlockBlob(BackupConfig config)
         {
-            var connectionString = ConfigurationManager.ConnectionStrings[_config.BlobStorageKey].ConnectionString;
-            var containerName = ConfigurationManager.AppSettings[_config.ContainerName];
-            var blobName = ConfigurationManager.AppSettings[_config.BlobName];
+            var connectionString = ConfigurationManager.ConnectionStrings[config.BlobStorageKey].ConnectionString;
+            var containerName = ConfigurationManager.AppSettings[config.ContainerName];
+            var blobName = ConfigurationManager.AppSettings[config.BlobName];
 
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
@@ -78,7 +71,7 @@ namespace Blanky.Utils
             var success = true;
             try
             {
-                var blob = getBlockBlob();
+                var blob = getBlockBlob(_backupConfig);
 
                 using (var fileStream = System.IO.File.OpenRead(Directory.GetFiles(backupInfo.Directory).First()))
                 {
@@ -95,14 +88,14 @@ namespace Blanky.Utils
             return Task.FromResult(success);
         }
 
-        public Task<bool> RestoreFromBackup(string filePath)
+        public Task<bool> RestoreFromBackup(string localFilePath, BackupConfig restoreConfig)
         {
             var success = true;
             try
             {
-                var blob = getBlockBlob();
+                var blob = getBlockBlob(restoreConfig);
 
-                using (var fileStream = System.IO.File.OpenWrite(filePath))
+                using (var fileStream = System.IO.File.OpenWrite(localFilePath))
                 {
                     blockBlob.DownloadToStream(fileStream);
                 }
@@ -116,6 +109,11 @@ namespace Blanky.Utils
             }
 
             return Task.FromResult(success);
+        }
+
+        public void UpdateBackupConfig(BackupConfig config)
+        {
+            _backupConfig = config;
         }
     }
 }
