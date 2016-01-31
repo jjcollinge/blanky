@@ -15,6 +15,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MicroserviceTemplate\MicroserviceTemplate.xproj" />
+    <ProjectReference Include="..\StatefulMicroservice\StatefulMicroservice.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Service Fabric Tools\Microsoft.VisualStudio.Azure.Fabric.ApplicationProject.targets" />
 </Project>
