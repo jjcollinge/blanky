@@ -8,10 +8,16 @@
     }
   },
   "profiles": {
+    "ServiceDeployer": {
+      "commandName": "ServiceDeployer",
+      "environmentVariables": {
+        "ASPNET_ENV": "Debug"
+      },
+      "sdkVersion": "dnx-clr-win-x64.1.0.0-rc2-16357"
+    },
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "index.html",
       "environmentVariables": {
         "Hosting:Environment": "Development"
       }
