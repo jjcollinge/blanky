@@ -17,7 +17,6 @@ using System.Collections.ObjectModel;
 
 namespace ServiceDeployer.Controllers
 {
-    [Route("api/[controller]")]
     public class ServiceUploadController : Controller
     {
         // Define constants
@@ -35,13 +34,15 @@ namespace ServiceDeployer.Controllers
 
         // GET: api/ServiceUpload
         [HttpGet]
-        public IEnumerable<string> Get()
+        [Route("/health")]
+        public string Get()
         {
-            return new string[] { "value1", "value2" };
+            return "A OK!";
         }
 
         // POST api/ServiceUpload
         [HttpPost]
+        [Route("/CreateService")]
         public async Task<HttpResponseMessage> Post()
         {
             HttpRequest req = this.Request;

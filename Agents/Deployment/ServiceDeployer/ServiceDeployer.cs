@@ -19,7 +19,7 @@ namespace ServiceDeployer
                                                     .Build();
 
             // Replace the address with the one dynamically allocated by Service Fabric.
-            string listeningAddress = AspNetCommunicationListener.GetListeningAddress(ServiceInitializationParameters, "ServiceRouterTypeEndpoint");
+            string listeningAddress = AspNetCommunicationListener.GetListeningAddress(ServiceInitializationParameters, "ServiceDeployerTypeEndpoint");
             webApp.GetAddresses().Clear();
             webApp.GetAddresses().Add(listeningAddress);
 
