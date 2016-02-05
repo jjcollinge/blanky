@@ -50,6 +50,7 @@ namespace ServiceRouter.ServiceDiscovery
 
             cacheUpdateTimer = new System.Timers.Timer(TimeSpan.FromSeconds(CACHE_REFRESH_TIME_SECONDS).TotalMilliseconds);
             cacheUpdateTimer.Elapsed += CacheUpdateTimer_UpdateServiceCache;
+            cacheUpdateTimer.Start();
         }
 
         private void PopulateServiceCache()
