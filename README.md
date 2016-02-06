@@ -5,8 +5,8 @@ Enrich Azure Service Fabric for developers
 
 Resources
 ---------------
-Node microservice generator: https://www.npmjs.com/package/generator-blanky
-Visual Studio Code Deployment Extension: https://marketplace.visualstudio.com/items?itemName=jcollinge.blanky
+- Node microservice generator: https://www.npmjs.com/package/generator-blanky
+- Visual Studio Code Deployment Extension: https://marketplace.visualstudio.com/items?itemName=jcollinge.blanky
 
 Principles
 ---------------
