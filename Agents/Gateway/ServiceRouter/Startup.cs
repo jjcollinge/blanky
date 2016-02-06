@@ -37,6 +37,7 @@ namespace ServiceRouter
             services.AddLogging();
             services.AddSingleton<FabricClient>();
             services.AddSingleton<Resolver>();
+            services.AddMvc();
         }
 
         public void ConfigureDebugServices(IServiceCollection services)
@@ -56,7 +57,7 @@ namespace ServiceRouter
             services.AddLogging();
             services.AddSingleton<FabricClient>(client);
             services.AddSingleton<Resolver>();
-            services.AddMvcCore();
+            services.AddMvc();
         }
 
         private void Client_ClientDisconnected(object sender, EventArgs e)
