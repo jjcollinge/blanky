@@ -68,8 +68,8 @@ module.exports = yeoman.generators.Base.extend({
 
                 mkdirp(that.destinationPath(pkgName + "/Config"), function (err) {
                     that.fs.copyTpl(
-                        that.templatePath('node/applicationmanifest.xml'),
-                        that.destinationPath('applicationmanifest.xml'),
+                        that.templatePath('node/ApplicationManifest.xml'),
+                        that.destinationPath('ApplicationManifest.xml'),
                         {
                             Name: pkgName,
                             Version: pkgVer
@@ -77,8 +77,8 @@ module.exports = yeoman.generators.Base.extend({
                         );
 
                     that.fs.copyTpl(
-                        that.templatePath('node/servicemanifest.xml'),
-                        that.destinationPath(pkgName + '/servicemanifest.xml'),
+                        that.templatePath('node/ServiceManifest.xml'),
+                        that.destinationPath(pkgName + '/ServiceManifest.xml'),
                         {
                             Name: pkgName,
                             Version: pkgVer
