@@ -1,0 +1,13 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+        {
+            "name": "yo",
+            "type": "node",
+            "program": "C:\\Users\\jocollin\\AppData\\Roaming\\npm\\node_modules\\yo\\lib\\cli.js",
+            "args": ["blanky", "--nolazy C:\\Repos\\blankyNodeGenerator\\generator-blanky-node-generator\\generators\\app\\index.js"],
+            "stopOnEntry": true,
+            "externalConsole": true
+        }
+	]
+}

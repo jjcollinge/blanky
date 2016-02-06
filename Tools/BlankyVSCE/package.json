@@ -1,0 +1,52 @@
+{
+	"name": "blanky",
+	"displayName": "blanky",
+	"description": "",
+	"version": "0.0.1",
+	"publisher": "NiTro",
+	"engines": {
+		"vscode": "^0.10.1"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onCommand:extension.blankyDeploy"
+	],
+	"main": "./out/src/extension",
+	"contributes": {
+		"commands": [{
+			"command": "extension.blankyDeploy",
+			"title": "Blanky Deploy"
+		}],
+        "configuration": {            
+            "type": "object",
+            "title": "Blanky configuration",
+            "properties": {
+                "blanky.deploymentendpoint": {
+                    "type": "string",
+                    "default": null,
+                    "description": "Specifies the Blanky service deployment endpoint url."
+                },
+                "blanky.keepzip": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Specifies if the zip file should be kept after deploying the service." 
+                },
+                "blanky.simulatedeploy": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Specifies if the actual deployment to service fabric is simulated." 
+                }
+            }
+        }
+	},
+	"scripts": {
+		"vscode:prepublish": "node ./node_modules/vscode/bin/compile",
+		"compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
+	},
+	"devDependencies": {
+		"typescript": "^1.6.2",
+		"vscode": "0.10.x"
+	}
+}
