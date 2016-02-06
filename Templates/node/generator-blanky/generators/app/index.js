@@ -46,6 +46,11 @@ module.exports = yeoman.generators.Base.extend({
                 name: 'pkgVer',
                 message: 'What is your app version?',
                 default: "1.0.0"
+            },
+            {
+                type: 'input',
+                name: 'endpoint',
+                message: 'What is your endpoint?'
             }];
 
         this.prompt(prompts, function (props) {
@@ -57,52 +62,62 @@ module.exports = yeoman.generators.Base.extend({
     writing: function () {
         var pkgName = this.props.pkgName;
         var pkgVer = this.props.pkgVer;
+        var pkgEndpoint = this.props.endpoint;
 
         console.log("Creating application " + pkgName + ":v" + pkgVer + "...");
-        
+
         var that = this;
-        
-        mkdirp(this.destinationPath(pkgName), function (err) {
 
-            mkdirp(that.destinationPath(pkgName + "/Code"), function (err) {
+        mkdirp(that.destinationPath(".vscode"), function (err) {
+            that.fs.copyTpl(
+                that.templatePath('node/settings.json'),
+                that.destinationPath('.vscode/settings.json'),
+                {
+                    Endpoint: pkgEndpoint
+                }
+                );
 
-                mkdirp(that.destinationPath(pkgName + "/Config"), function (err) {
-                    that.fs.copyTpl(
-                        that.templatePath('node/ApplicationManifest.xml'),
-                        that.destinationPath('ApplicationManifest.xml'),
-                        {
-                            Name: pkgName,
-                            Version: pkgVer
-                        }
-                        );
+            mkdirp(that.destinationPath(pkgName), function (err) {
 
-                    that.fs.copyTpl(
-                        that.templatePath('node/ServiceManifest.xml'),
-                        that.destinationPath(pkgName + '/ServiceManifest.xml'),
-                        {
-                            Name: pkgName,
-                            Version: pkgVer
-                        }
-                        );
+                mkdirp(that.destinationPath(pkgName + "/Code"), function (err) {
 
-                    ncp(that.templatePath("node/Code/"), that.destinationPath(pkgName + "/Code"), function (err) {
-                        if (err) {
-                            return console.error(err);
-                        }
-                        console.log('Copied code files');
+                    mkdirp(that.destinationPath(pkgName + "/Config"), function (err) {
+                        that.fs.copyTpl(
+                            that.templatePath('node/ApplicationManifest.xml'),
+                            that.destinationPath('ApplicationManifest.xml'),
+                            {
+                                Name: pkgName,
+                                Version: pkgVer
+                            }
+                            );
+
+                        that.fs.copyTpl(
+                            that.templatePath('node/ServiceManifest.xml'),
+                            that.destinationPath(pkgName + '/ServiceManifest.xml'),
+                            {
+                                Name: pkgName,
+                                Version: pkgVer
+                            }
+                            );
+
+                        ncp(that.templatePath("node/Code/"), that.destinationPath(pkgName + "/Code"), function (err) {
+                            if (err) {
+                                return console.error(err);
+                            }
+                            console.log('Copied code files');
+                        });
+
+                        ncp(that.templatePath("node/Config/"), that.destinationPath(pkgName + "/Config"), function (err) {
+                            if (err) {
+                                return console.error(err);
+                            }
+                            console.log('Copied config files');
+                        });
+
                     });
-
-                    ncp(that.templatePath("node/Config/"), that.destinationPath(pkgName + "/Config"), function (err) {
-                        if (err) {
-                            return console.error(err);
-                        }
-                        console.log('Copied config files');
-                    });
-
                 });
             });
         });
-
     },
     install: function () {
         this.installDependencies();

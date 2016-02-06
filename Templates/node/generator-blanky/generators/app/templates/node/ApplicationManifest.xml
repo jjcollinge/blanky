@@ -4,13 +4,13 @@
     <ServiceManifestRef ServiceManifestName="<%= Name %>" ServiceManifestVersion="<%= Version %>" />
   </ServiceManifestImport>
   <ServiceTemplates>
-    <StatelessService ServiceTypeName="<%= Name %>" DefaultMoveCost="High" InstanceCount="1">
+    <StatelessService ServiceTypeName="NodeMicroservice" DefaultMoveCost="High" InstanceCount="1">
       <SingletonPartition/>
     </StatelessService>
   </ServiceTemplates>
    <DefaultServices>
     <Service Name="<%= Name %>">
-      <StatelessService ServiceTypeName="<%= Name %>" DefaultMoveCost="High" InstanceCount="1" >
+      <StatelessService ServiceTypeName="NodeMicroservice" DefaultMoveCost="High" InstanceCount="1" >
         <SingletonPartition />
       </StatelessService>
     </Service>

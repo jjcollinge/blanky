@@ -3,7 +3,7 @@
 	"displayName": "blanky",
 	"description": "",
 	"version": "0.0.1",
-	"publisher": "NiTro",
+	"publisher": "jcollinge",
 	"engines": {
 		"vscode": "^0.10.1"
 	},
