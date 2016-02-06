@@ -1,26 +1,30 @@
 {
-  "name": "generator-blanky",
-  "version": "1.0.0-beta5",
-  "description": "",
-  "homepage": "",
-  "author": {
-    "name": "JC",
-    "email": "",
-    "url": ""
-  },
-  "files": [
-    "generators"
-  ],
-  "main": "generators\\index.js",
-  "keywords": [
-    ""
-  ],
-  "dependencies": {
-    "yeoman-generator": "^0.22.5",
-    "yosay": "^1.1.0",
-    "ncp": "^2.0.0",
-    "chalk": "*",
-    "mkdirp": "*",
-    "glob": "*"
-  }
+    "name": "generator-blanky",
+    "version": "1.0.0-beta6",
+    "description": "",
+    "homepage": "",
+    "author": {
+        "name": "JC",
+        "email": "",
+        "url": ""
+    },
+    "files": [
+        "generators"
+    ],
+    "main": "generators\\index.js",
+    "keywords": [
+        ""
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jjcollinge/blanky"
+    },
+    "dependencies": {
+        "yeoman-generator": "^0.22.5",
+        "yosay": "^1.1.0",
+        "ncp": "^2.0.0",
+        "chalk": "*",
+        "mkdirp": "*",
+        "glob": "*"
+    }
 }
