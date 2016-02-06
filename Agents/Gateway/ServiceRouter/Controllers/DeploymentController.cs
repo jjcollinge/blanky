@@ -19,7 +19,7 @@ namespace ServiceRouter.Controllers
     {
         // Define constants
         private const string ROOT_DIR = @"..\work\";
-        private const string DEPLOY_SCRIPT_PATH = @"approot\src\ServiceDeployer\deploymentScript.ps1";
+        private const string DEPLOY_SCRIPT_PATH = @"approot\src\ServiceRouter\deploymentScript.ps1";
 
         private class Service
         {
@@ -41,10 +41,9 @@ namespace ServiceRouter.Controllers
         // POST api/ServiceUpload
         [HttpPost]
         [Route("CreateService/")]
-        public async Task<HttpResponseMessage> Post()
+        public async Task<string> Post()
         {
             HttpRequest req = this.Request;
-            HttpResponseMessage res;
 
             if (requestHasZip(req))
             {
@@ -59,18 +58,16 @@ namespace ServiceRouter.Controllers
                         4. Clean up any existing application data
                         5. Create an instance of the application type
                 */
-                res = deployService(service);
+                return deployService(service);
             }
             else
             {
-                res = new HttpResponseMessage(HttpStatusCode.BadRequest);
-                res.ReasonPhrase = "No file was provided";
+                throw new InvalidOperationException("File not provided");
             }
 
-            return res;
         }
 
-        private HttpResponseMessage deployService(Service service)
+        private string deployService(Service service)
         {
             HttpResponseMessage res;
             using (Runspace runspace = RunspaceFactory.CreateRunspace())
@@ -85,19 +82,10 @@ namespace ServiceRouter.Controllers
                 bool success;
                 string result = invokeDeploymentScript(ps, out success);
 
-                // Set appropriate status code
-                if (!success)
-                {
-                    res = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-                }
-                else
-                {
-                    res = new HttpResponseMessage(HttpStatusCode.OK);
-                }
-                res.ReasonPhrase = result;
+                return result;
+                
             }
 
-            return res;
         }
 
         private static Service loadService(string zippedUnzipPath)

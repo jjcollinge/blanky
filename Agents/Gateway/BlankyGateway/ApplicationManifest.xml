@@ -16,6 +16,9 @@
    <ServiceManifestImport>
       <ServiceManifestRef ServiceManifestName="ServiceRouter" ServiceManifestVersion="1.0.0" />
       <ConfigOverrides />
+      <Policies>
+         <RunAsPolicy CodePackageRef="Code" UserRef="AdminUser" />
+      </Policies>
    </ServiceManifestImport>
    <DefaultServices>
       <Service Name="HealthWatchdog">
@@ -34,4 +37,9 @@
          </StatelessService>
       </Service>
    </DefaultServices>
+   <Principals>
+      <Users>
+         <User Name="AdminUser" />
+      </Users>
+   </Principals>
 </ApplicationManifest>

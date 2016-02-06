@@ -22,7 +22,7 @@ Write-Verbose 'Successfully connected!'
 
 Write-Verbose 'Copying application package...'
 ##When deploying to azure cluster remove the imagestoreconnectionstring parameter
-Copy-ServiceFabricApplicationPackage -ApplicationPackagePath $appPackagePath -ImageStoreConnectionString 'file:C:\SfDevCluster\Data\ImageStoreShare' -ApplicationPackagePathInImageStore $appImageStoreName
+Copy-ServiceFabricApplicationPackage -ApplicationPackagePath $appPackagePath -ApplicationPackagePathInImageStore $appImageStoreName
 Write-Verbose 'Successfully copied app!'
 
 Write-Verbose 'Registering application type...'
