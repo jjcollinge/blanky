@@ -32,6 +32,11 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Specifies if the zip file should be kept after deploying the service." 
+                },
+                "blanky.simulatedeploy": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Specifies if the actual deployment to service fabric is simulated." 
                 }
             }
         }
