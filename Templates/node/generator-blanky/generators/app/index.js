@@ -54,7 +54,7 @@ module.exports = yeoman.generators.Base.extend({
         }.bind(this));
     },
 
-    copying: function () {
+    writing: function () {
         var pkgName = this.props.pkgName;
         var pkgVer = this.props.pkgVer;
 
@@ -105,9 +105,9 @@ module.exports = yeoman.generators.Base.extend({
 
     },
     install: function () {
-        //this.installDependencies();
+        this.installDependencies();
     },
-    final: function () {
+    end: function () {
         console.log("Created application");
     }
 });

@@ -49,6 +49,8 @@ class Blanky {
     
     public Deploy()
     {
+        vscode.window.showInformationMessage("Getting things started, checking some stuff locally");
+        
         this.ValidateWorkspace();
         // this.GetConfigSettings();
         // this.TryRemoveZipFile();        
