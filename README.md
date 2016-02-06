@@ -3,7 +3,12 @@ Blanky
 
 Enrich Azure Service Fabric for developers
 
-Principals
+Resources
+---------------
+Node microservice generator: https://www.npmjs.com/package/generator-blanky
+Visual Studio Code Deployment Extension: https://marketplace.visualstudio.com/items?itemName=jcollinge.blanky
+
+Principles
 ---------------
 
 - Make using service fabric services simple
