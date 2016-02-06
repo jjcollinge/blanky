@@ -1,0 +1,21 @@
+{
+  "name": "generator-blanky",
+  "version": "1.0.0",
+  "description": "A template for creating a node microservice",
+  "homepage": "",
+  "author": "",
+  "files": [
+    "generators"
+  ],
+  "main": "index.js",
+  "keywords": [
+    ""
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "yeoman-generator": "^0.22.5"
+  }
+}

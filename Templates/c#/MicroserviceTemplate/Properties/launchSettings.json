@@ -1,0 +1,32 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:24204/",
+      "sslPort": 0
+    }
+  },
+  "profiles": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "Hosting:Environment": "Development"
+      }
+    },
+    "web": {
+      "commandName": "web",
+      "environmentVariables": {
+        "Hosting:Environment": "Development"
+      }
+    },
+    "MicroserviceTemplate": {
+      "commandName": "MicroserviceTemplate",
+      "sdkVersion": "dnx-clr-win-x64.1.0.0-rc2-16357",
+      "environmentVariables": {
+        "ASPNET_ENV": "Debug"
+      }
+    }
+  }
+}
