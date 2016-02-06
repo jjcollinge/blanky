@@ -2,7 +2,7 @@
 	"name": "blanky",
 	"displayName": "blanky",
 	"description": "",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"publisher": "jcollinge",
 	"engines": {
 		"vscode": "^0.10.1"
