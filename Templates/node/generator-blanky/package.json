@@ -1,12 +1,12 @@
 {
   "name": "generator-blanky",
-  "version": "0.0.0",
+  "version": "1.0.0-beta2",
   "description": "",
   "homepage": "",
   "author": {
-    "name": "Joni Collinge",
-    "email": "jonathan-collinge@hotmail.com",
-    "url": "http://dotjson.uk"
+    "name": "JC",
+    "email": "",
+    "url": ""
   },
   "files": [
     "generators"
@@ -14,5 +14,13 @@
   "main": "generators\\index.js",
   "keywords": [
     ""
-  ]
+  ],
+  "dependencies": {
+    "yeoman-generator": "^0.22.5",
+    "yosay": "^1.1.0",
+    "ncp": "^2.0.0",
+    "chalk": "*",
+    "mkdirp": "*",
+    "glob": "*"
+  }
 }
