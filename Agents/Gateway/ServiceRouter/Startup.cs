@@ -56,6 +56,7 @@ namespace ServiceRouter
             services.AddLogging();
             services.AddSingleton<FabricClient>(client);
             services.AddSingleton<Resolver>();
+            services.AddMvcCore();
         }
 
         private void Client_ClientDisconnected(object sender, EventArgs e)
@@ -133,10 +134,14 @@ namespace ServiceRouter
                 });
             });
 
+            app.UseMvc();
+
+
             app.Run(async context =>
             {
                 await context.Response.WriteAsync(Constants.HelpText);
             });
+
         }
     }
 }

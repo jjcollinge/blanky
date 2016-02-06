@@ -4,7 +4,6 @@
     "emitEntryPoint": true
   },
   "dependencies": {
-    "Microsoft.AspNet.Mvc.Core": "6.0.0-rc2-16770",
     "Microsoft.AspNet.Mvc.Formatters.Json": "6.0.0-rc2-16770",
     "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc2-16236",
     "Microsoft.Extensions.Caching.Memory": "1.0.0-rc1-final",
@@ -20,12 +19,19 @@
     "Microsoft.ServiceFabric.Services": "1.4.87-preview",
     "Microsoft.AspNet.Proxy": "1.0.0-rc2-16034",
     "StackExchange.Redis": "1.0.488",
-    "Newtonsoft.Json": "8.0.2"
+    "Newtonsoft.Json": "8.0.2",
+    "System.Xml.XmlSerializer": "4.0.11-beta-23516",
+    "Microsoft.AspNet.Http.Abstractions": "1.0.0-rc2-16106",
+    "Microsoft.PowerShell.5.ReferenceAssemblies": "1.0.0",
+    "SharpZipLib": "0.86.0",
+    "System.Xml.XDocument": "4.0.11-rc2-23623",
+    "Microsoft.AspNet.Mvc": "6.0.0-rc2-16770",
+    "ZipStorer": "2.38.0"
   },
   "frameworks": {
     "dnx451": {
       "frameworkAssemblies": {
-        "System.Net.Http": "4.0.0.0"
+        "System.XML": "4.0.0.0"
       }
     }
   },
