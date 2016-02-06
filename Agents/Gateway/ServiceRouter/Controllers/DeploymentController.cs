@@ -58,6 +58,8 @@ namespace ServiceRouter.Controllers
                         4. Clean up any existing application data
                         5. Create an instance of the application type
                 */
+                await Task.Delay(500);
+
                 return deployService(service);
             }
             else

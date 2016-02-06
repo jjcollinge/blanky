@@ -47,5 +47,8 @@
     "**.user",
     "**.vspscc",
     "PackageRoot"
-  ]
+  ],
+  "configurations": {
+    "CIBuild": { }
+  }
 }

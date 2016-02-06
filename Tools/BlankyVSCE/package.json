@@ -47,6 +47,7 @@
 	},
 	"devDependencies": {
 		"typescript": "^1.6.2",
-		"vscode": "0.10.x"
+		"vscode": "0.10.x",
+        "bauer-zip": "1.0.2"
 	}
 }
