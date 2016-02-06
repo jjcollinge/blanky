@@ -29,7 +29,12 @@ namespace ServiceRouter.Middleware
             try
             {
                 //Find out what we're routing too. 
+
                 var intendedServiceEndpoint = await resolver.ResolveEndpoint(context);
+
+                //strip out route stuff. 
+                var path = context.Request.Path.Value;
+                var pathArray = path.Split('\\');
 
                 //Log the info out to redis. 
                 try
@@ -58,11 +63,11 @@ namespace ServiceRouter.Middleware
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
 
-                //If the call is internal to the cluster assume endpoints are reachable 
-                //so issue a redirect. This means no proxying so removes the gateway as a bottleneck. 
+                ////If the call is internal to the cluster assume endpoints are reachable 
+                ////so issue a redirect. This means no proxying so removes the gateway as a bottleneck. 
                 if (context.Connection.IsLocal)
                 {
-                    await Issue307RedirectToService(context, intendedServiceEndpoint);
+                    await Issue307RedirectToService(context, intendedServiceEndpoint + context.Request.Path.Value);
                 }
                 else
                 {
@@ -105,8 +110,11 @@ namespace ServiceRouter.Middleware
             {
                 Host = uri.Host,
                 Port = uri.Port.ToString(),
-                Scheme = uri.Scheme
+                Scheme = uri.Scheme,
+
             });
+
+
             await proxyMiddleware.Invoke(context);
         }
     }

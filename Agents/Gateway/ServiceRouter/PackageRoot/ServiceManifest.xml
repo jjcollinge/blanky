@@ -15,7 +15,7 @@
    </CodePackage>
    <Resources>
       <Endpoints>
-        <Endpoint Name="ServiceRouterTypeEndpoint" Protocol="http" Type="Input" Port="8283" />
+        <Endpoint Name="ServiceRouterTypeEndpoint" Protocol="http" Type="Input" Port="80" />
       </Endpoints>
    </Resources>
 </ServiceManifest>

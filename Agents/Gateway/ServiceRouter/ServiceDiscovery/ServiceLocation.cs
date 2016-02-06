@@ -51,6 +51,11 @@ namespace ServiceRouter.ServiceDiscovery
             ApplicationName = pathComponents[1];
             ServiceName = pathComponents[2];
 
+            //Stip out routing information from the path so proxy can forward. 
+            request.Path = new PathString("/" + string.Join("/", pathComponents.Skip(3)));
+            request.PathBase = new PathString("");
+
+
             //Todo: Handle optional params like listenername and version. 
 
         }

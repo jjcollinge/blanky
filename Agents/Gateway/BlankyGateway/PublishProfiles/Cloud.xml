@@ -14,7 +14,8 @@
                                     FindValue="9876543210987654321098765432109876543210"
                                     StoreLocation="CurrentUser"
                                     StoreName="My" />
+                                    http://blankycluster.westus.cloudapp.azure.com:19080/Explorer/index.html
   -->
-  <ClusterConnectionParameters ConnectionEndpoint="party62907.westus.cloudapp.azure.com:19000" />
+  <ClusterConnectionParameters ConnectionEndpoint="blankycluster.westus.cloudapp.azure.com:19000" />
   <ApplicationParameterFile Path="..\ApplicationParameters\Cloud.xml" />
 </PublishProfile>

@@ -1,23 +1,21 @@
-﻿using System;
+﻿using Microsoft.AspNet.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Http;
-using System.Net;
-using System.IO;
-using System.IO.Compression;
-using System.Management.Automation;
-using System.Text;
-using System.Management.Automation.Runspaces;
-using System.Xml.Linq;
 using System.Xml.Serialization;
-using System.Collections.ObjectModel;
+using Microsoft.AspNet.Http;
+using System.Management.Automation.Runspaces;
+using System.Net;
+using System.Management.Automation;
+using System.IO;
+using System.Text;
+using System.IO.Compression;
 
-namespace ServiceDeployer.Controllers
+namespace ServiceRouter.Controllers
 {
-    public class ServiceUploadController : Controller
+    public class DeploymentController : Controller
     {
         // Define constants
         private const string ROOT_DIR = @"..\work\";
@@ -34,7 +32,7 @@ namespace ServiceDeployer.Controllers
 
         // GET: api/ServiceUpload
         [HttpGet]
-        [Route("/health")]
+        [Route("health/")]
         public string Get()
         {
             return "A OK!";
@@ -42,13 +40,13 @@ namespace ServiceDeployer.Controllers
 
         // POST api/ServiceUpload
         [HttpPost]
-        [Route("/CreateService")]
+        [Route("CreateService/")]
         public async Task<HttpResponseMessage> Post()
         {
             HttpRequest req = this.Request;
             HttpResponseMessage res;
 
-            if(requestHasZip(req))
+            if (requestHasZip(req))
             {
                 string zippedUnzipPath = await extractZippedService(req);
                 Service service = loadService(zippedUnzipPath);
@@ -68,7 +66,7 @@ namespace ServiceDeployer.Controllers
                 res = new HttpResponseMessage(HttpStatusCode.BadRequest);
                 res.ReasonPhrase = "No file was provided";
             }
-            
+
             return res;
         }
 
@@ -196,11 +194,11 @@ namespace ServiceDeployer.Controllers
                 if (success == true) success = false;
             }
 
-            foreach(var err in ps.Streams.Error)
+            foreach (var err in ps.Streams.Error)
             {
                 scriptOutput.AppendLine($"ERROR: {err.ToString()}");
                 if (success == true) success = false;
-            } 
+            }
 
             foreach (var line in ps.Streams.Verbose)
             {

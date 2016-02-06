@@ -50,6 +50,7 @@ namespace ServiceRouter.ServiceDiscovery
 
             cacheUpdateTimer = new System.Timers.Timer(TimeSpan.FromSeconds(CACHE_REFRESH_TIME_SECONDS).TotalMilliseconds);
             cacheUpdateTimer.Elapsed += CacheUpdateTimer_UpdateServiceCache;
+            cacheUpdateTimer.Start();
         }
 
         private void PopulateServiceCache()
@@ -161,7 +162,7 @@ namespace ServiceRouter.ServiceDiscovery
                 InternalEndpointRandom = endpoints.OrderBy(x => Guid.NewGuid()).First(), //Todo: optimize this, endure even distribution
                 IsRoutableByGateway = endpoints.Any(x => x.ToLower().Contains("http")),
                 //Todo: get the port from config. 
-                RoutedEndpoint = fabricAddress.ToString().Replace("fabric:/", "http://localhost:8505/route/")
+                RoutedEndpoint = fabricAddress.ToString().Replace("fabric:/", "http://blankycluster.westus.cloudapp.azure.com/route/")
             };
             return endpointResult;
         }

@@ -7,11 +7,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ServiceRouter
-{
+namespace ServiceDeployer
+{ 
     public static class Program
     {
-        private const string LocalListeningAddress = "http://+:8283";
+        private const string LocalListeningAddress = "http://+:8284";
 
         public static void Main(string[] args)
         {
@@ -33,7 +33,7 @@ namespace ServiceRouter
                     Console.WriteLine(LocalListeningAddress);
                     webApp.Run();
                     Thread.Sleep(Timeout.Infinite);
-                    
+
                 }
                 catch (Exception ex)
                 {
@@ -45,7 +45,7 @@ namespace ServiceRouter
 
             using (var fabricRuntime = FabricRuntime.Create())
             {
-                fabricRuntime.RegisterServiceType("ServiceRouterType", typeof(ServiceRouter));
+                fabricRuntime.RegisterServiceType("ServiceDeployerType", typeof(ServiceDeployer));
 
                 Thread.Sleep(Timeout.Infinite);
             }

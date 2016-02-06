@@ -54,6 +54,7 @@ BBBBBBBBBBBBBBBBB   llllllll  aaaaaaaaaa  aaaa nnnnnn    nnnnnnkkkkkkkk    kkkkk
                         - list/services
                         - list/endpoints
                         - list/usage
+
                     
                     N.B. To access a service endpoints externally from the cluster use 'RoutedEndpoint'
                          replace 'localhost:8283' with the External IP/Port and ensure
@@ -64,6 +65,9 @@ BBBBBBBBBBBBBBBBB   llllllll  aaaaaaaaaa  aaaa nnnnnn    nnnnnnkkkkkkkk    kkkkk
                     
                     N.B. Cluster routing reqeusts originating in a SF cluster will receive Redirect:307 
                          with the actual service endpoint to avoid bottle neck or throughput issues in the ServiceRouter
+
+                    Create Operations
+                        - CreateService
                     ";
     }
 }
