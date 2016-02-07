@@ -1,13 +1,5 @@
-# README
-## This is the README for your extension "helloworld" 
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
+# Blanky VSCode extension
+A visual studio code extension to deploy a provided package to a Servicve Fabric cluster.
 
-* Split the editor (`Cmd+\` on OSX or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on OSX or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (OSX) to see a list of Markdown snippets
-
-### For more information
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-** Enjoy!**
+## What is Blanky?
+Blanky is a set of services and tooling which enriches the development experience for Microsoft's Service Fabric product. It allows you to develop from any platform, using any language and drastically improves usability.
