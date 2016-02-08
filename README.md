@@ -6,7 +6,7 @@ Blanky is a collection of additional services and tooling which enrich the devel
 Resources
 ---------------
 
-###Node Microservice Generator
+####Node Microservice Generator
 Generate a standard microservice node server template using yeoman.<br />
 https://www.npmjs.com/package/generator-blanky
 
