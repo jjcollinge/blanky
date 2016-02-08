@@ -1,12 +1,16 @@
 Blanky
 ---------------
 
-Enrich Azure Service Fabric for developers
+Blanky is a collection of additional services and tooling which enrich the developer experience of Microsoft's Service Fabric product. By offering prebaked services which handle common use cases such as health reporting, api stats, etc. the developer is free to only concern themselves with their own value proposition. Additionally, we have created tooling which allows developers to create and deploy services into the Service Fabric cluster from any platform. There are a numerous more opportunities for us to continue to super charge the capabilities and useability of Service Fabric to make it a more competetive product.
 
 Resources
 ---------------
-- Node microservice generator: https://www.npmjs.com/package/generator-blanky
-- Visual Studio Code Deployment Extension: https://marketplace.visualstudio.com/items?itemName=jcollinge.blanky
+###Node microservice generator
+Generate a standard microservice node server template using yeoman.
+https://www.npmjs.com/package/generator-blanky
+###Visual Studio Code Deployment Extension
+Deploy your Service Fabric package directly from VSCode using this handy extension.
+https://marketplace.visualstudio.com/items?itemName=jcollinge.blanky
 
 Principles
 ---------------
@@ -32,7 +36,7 @@ Architecture
                   +-+-----------------+            | |                                                                                |
                     ^                              | |                                                                                |
                     | Invokes                      | |    +---------------+            +-----------------------+                      |
-                    |                              | |    | Deployment    +----------->+Service Fabric Client  |                      |
+                    |                              | |    | Deployment    +----------->| Service Fabric Client |                      |
                   +-+----------------+  Uses       | |    +---------------+            +------------+----------+                      |
                   | Client           +-------------+ |                                              ^                                 |
                   +------------------+               |    +---------------+                         |                                 |
@@ -40,15 +44,15 @@ Architecture
                                                      |    +---------------+     |                                                     |
                                                      |                          |                                                     |
                                                      |    +---------------+     |      +-----------------------+                      |
-                                                     |    | Gateway       +-----+----->+MyMicroservice         |                      |
+                                                     |    | Gateway       +-----+----->| MyMicroservice        |                      |
                                                      |    +---------------+            +-----------------------+                      |
                                                      |                                                                                |
                                                      |    +---------------+            +-----------------------+  X                   |
-                                                     |    | Watchdog      +----------->+Health API             |  XX                  |
+                                                     |    | Watchdog      +----------->| Health API            |  XX                  |
                                                      |    +---------------+            +-----------------------+   X                  |
                                                      |                                                             X--- Template      |
                                                      |    +---------------+            +-----------------------+   X                  |
-                                                     |    | Auth          |            |Swagger API            |  XX                  |
+                                                     |    | Auth          |            | Swagger API           |  XX                  |
                                                      |    +---------------+            +-------------+---------+  X                   |
                                                      |                                               ^                                |
                                                      |    +---------------+                          |                                |
