@@ -5,11 +5,13 @@ Blanky is a collection of additional services and tooling which enrich the devel
 
 Resources
 ---------------
-###Node microservice generator
-Generate a standard microservice node server template using yeoman.
+
+###Node Microservice Generator
+Generate a standard microservice node server template using yeoman.<br />
 https://www.npmjs.com/package/generator-blanky
-###Visual Studio Code Deployment Extension
-Deploy your Service Fabric package directly from VSCode using this handy extension.
+
+####Visual Studio Code Deployment Extension
+Deploy your Service Fabric package directly from VSCode using this handy extension.<br />
 https://marketplace.visualstudio.com/items?itemName=jcollinge.blanky
 
 Principles
