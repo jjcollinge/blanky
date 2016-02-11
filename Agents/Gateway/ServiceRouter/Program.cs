@@ -11,7 +11,7 @@ namespace ServiceRouter
 {
     public static class Program
     {
-        private const string LocalListeningAddress = "http://+:8283";
+        private const string LocalListeningAddress = "http://+:8284";
 
         public static void Main(string[] args)
         {
