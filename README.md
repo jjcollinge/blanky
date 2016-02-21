@@ -3,6 +3,8 @@ Blanky
 
 Blanky is a collection of additional services and tooling which enrich the developer experience of Microsoft's Service Fabric product. By offering prebaked services which handle common use cases such as health reporting, api stats, etc. the developer is free to only concern themselves with their own value proposition. Additionally, we have created tooling which allows developers to create and deploy services into the Service Fabric cluster from any platform. There are a numerous more opportunities for us to continue to super charge the capabilities and useability of Service Fabric to make it a more competetive product.
 
+###Note: In order to restore the required Nuget packages you will have to add the Nuget Package Source for aspnetvnext which can be found at https://www.myget.org/gallery/aspnetvnext
+
 Resources
 ---------------
 
