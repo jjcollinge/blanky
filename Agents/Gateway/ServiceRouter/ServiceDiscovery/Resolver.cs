@@ -101,8 +101,14 @@ namespace ServiceRouter.ServiceDiscovery
             {
                 foreach (var service in await fabClient.QueryManager.GetServiceListAsync(application.ApplicationName))
                 {
-                    services.Add(new ServiceLocation(application, service));
+                    var serviceLocation = new ServiceLocation(application, service);
+                    var serviceHealthResponse = await fabClient
+                                            .HealthManager
+                                            .GetServiceHealthAsync(serviceLocation.FabricAddress);
 
+                    serviceLocation.ServiceHealth = serviceHealthResponse.AggregatedHealthState.ToString();
+
+                    services.Add(serviceLocation);
                 }
             }
             return services;

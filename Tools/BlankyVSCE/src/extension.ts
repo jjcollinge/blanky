@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 var fs = require('fs');
 var path = require('path');
 var request = require('request');
+var progress = require('request-progress');
 
 // Using bauer-zip npm package for creating the zip file (https://www.npmjs.com/package/bauer-zip)
 var z = require('bauer-zip');
@@ -35,12 +36,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 class Blanky {
     private _folderToZip: string = vscode.workspace.rootPath;
+    private _outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel("Blanky Deployment");
     private _zipFilename: string = '.blanky.zip';
     private _zipFilepath: string; 
     private _keepZip: boolean = false;
     private _deploymentEndpoint: string;
     private _zipExists: boolean = false;
     private _simulateDeploy: boolean = false;
+    private _showVerboseLogging = true;
 
     
     public constructor() {
@@ -49,8 +52,9 @@ class Blanky {
     
     public Deploy()
     {
-        vscode.window.showInformationMessage("Getting things started, checking some stuff locally");
-        
+        this._outputChannel.clear();
+        this._outputChannel.show();
+        this._outputChannel.appendLine("Getting things started, checking some stuff locally");
         this.ValidateWorkspace();
         // this.GetConfigSettings();
         // this.TryRemoveZipFile();        
@@ -68,12 +72,12 @@ class Blanky {
         var manifestPath: string = path.join(vscode.workspace.rootPath, 'ApplicationManifest.xml');
         
         if (!fs.existsSync(manifestPath)) {
-            vscode.window.showErrorMessage('Not a valid project: ApplicationManifest.xml file is missing.');
+            this.ShowMessageInUI('Not a valid project: ApplicationManifest.xml file is missing.', UIMessageType.Error);
             console.error('ApplicationManifest file is missing.');
         } else {
             vscode.workspace.findFiles("**/ServiceManifest.xml", null).then(function (results) {
                 if (results.length===0) {
-                    vscode.window.showErrorMessage('Not a valid project: ServiceManifest.xml file is missing.');
+                    this.ShowMessageInUI('Not a valid project: ServiceManifest.xml file is missing.', UIMessageType.Error);
                     console.error('ServiceManifest file is missing.');
                 } else {
                     that.GetConfigSettings();
@@ -87,12 +91,13 @@ class Blanky {
     // Zipping up all files in the current folder        
     private CreateZipFile() {
         var that = this;
-        
+        that.ShowMessageInUI('Creating Zip for upload', UIMessageType.Info);
         z.zip(this._folderToZip, this._zipFilepath, function (err){
             if(err)
             {
                 console.log('Zip file creation failed');
                 console.log(err);
+                that.ShowMessageInUI('Zip file creation failed' + err, UIMessageType.Error);
                 throw err;
             }
             else
@@ -106,7 +111,7 @@ class Blanky {
     
     private TryRemoveZipFile() {
         if (fs.existsSync(this._zipFilepath)) {
-           console.log ('Cleaning up existing zip file.');
+           this.ShowMessageInUI('Cleaning up existing zip file.', UIMessageType.Verbose);
            fs.unlinkSync(this._zipFilepath);
         };
     }
@@ -117,18 +122,18 @@ class Blanky {
         this._keepZip = config.get("keepzip") as boolean;        
         this._simulateDeploy = config.get("simulatedeploy") as boolean;
         
-        console.log ('Keepzip config setting: ' + this._keepZip);
-        console.log ('SimulateDeploy config setting: ' + this._simulateDeploy);
+        this.ShowMessageInUI('Keepzip config setting: ' + this._keepZip, UIMessageType.Verbose);
+        this.ShowMessageInUI('SimulateDeploy config setting: ' + this._simulateDeploy, UIMessageType.Verbose);
         
         let endpoint = config.get("deploymentendpoint") as string;
         
         if(!endpoint) {
             console.log ('Deployment endpoint not specified in config.');
-            vscode.window.showErrorMessage("You have no Blanky deployment endpoint specified.");
+            this.ShowMessageInUI("You have no Blanky deployment endpoint specified.", UIMessageType.Error);
             throw "You have no Blanky deployment endpoint specified.";
         } else {
             this._deploymentEndpoint = endpoint;
-            console.log ('Deployment endpoint config setting: ' + endpoint);
+            this.ShowMessageInUI('Deployment endpoint config setting: ' + endpoint, UIMessageType.Verbose);
         }   
     }
     
@@ -138,35 +143,50 @@ class Blanky {
             var that = this;
                     
             console.log('Starting deployment to ' + this._deploymentEndpoint);
-            vscode.window.showInformationMessage("Deploying to " + this._deploymentEndpoint);
+            this.ShowMessageInUI("Deploying to " + this._deploymentEndpoint);
             
             // Invoke the deployment endpoint rest service
-            var req = request({
-                uri: this._deploymentEndpoint,
-                method: "POST",
-                timeout: 900000},
+            var formDataToSend = {
+                deplymentZip: fs.createReadStream(this._zipFilepath)
+            };
+           
+            // Attempted to use request-progress to show upload progress when deploying. https://www.npmjs.com/package/request-progress
+            progress(request({
+                    uri: this._deploymentEndpoint,
+                    method: "POST",
+                    timeout: 900000,
+                    formData: formDataToSend,
+                },
                 function (err, resp, body) {
                     if (err) {
                         console.log(err);
-                        vscode.window.showErrorMessage('Deploying to Blanky failed:' + err);
+                        that.ShowMessageInUI('Deploying to Blanky failed:' + err, UIMessageType.Error);
                     } else {
-                        console.log('Server response: ' + body);
-                        vscode.window.showInformationMessage('Deploying to Blanky completed succesfully!');
+                        that.ShowMessageInUI('Server response: ' + body, UIMessageType.Info);
+                        that.ShowMessageInUI('Deploying to Blanky completed');
                     }
 
                     that.Cleanup();
-                    
                     console.log('Blanky deployment completed');
+                }), {
+                throttle: 10,                    // Throttle the progress event to 2000ms, defaults to 1000ms 
+                delay: 0
+            })
+            .on('progress', function (state) {
+                that.ShowMessageInUI("Completed: " + state.percentage * 100 + " Estimated time remaining: " + state.time.remaining)
+                if (state.percentage === 1)
+                {
+                    that.ShowMessageInUI("Upload completed in: " + state.time.elapsed)
                 }
-                );
+            });
 
-            var form = req.form();
-            form.append('file', fs.createReadStream(this._zipFilepath));        
+            // var form = req.form();
+            // form.append('file', fs.createReadStream(this._zipFilepath));        
         } else {
             console.log('Simulating deployment to ' + this._deploymentEndpoint);
             that.Cleanup();
 
-            vscode.window.showInformationMessage('Deploying to Blanky completed succesfully!');
+            that.ShowMessageInUI('Deploying to Blanky completed succesfully!');
 
             console.log('Blanky deployment completed');
         }
@@ -179,8 +199,38 @@ class Blanky {
         }     
     }
     
+    private ShowMessageInUI(message: string, messageType?: UIMessageType)
+    {
+        //If message type not set default to information
+        if (messageType === null){
+            messageType = UIMessageType.Info;
+        }
+        
+        //If the message is verbose and verbose logging is disabled ignore it. 
+        if (messageType === UIMessageType.Verbose  && !this._showVerboseLogging){
+            return;
+        }
+        
+        if (messageType === UIMessageType.Error)
+        {
+            vscode.window.showErrorMessage(message);
+            this._outputChannel.appendLine('[Error]::' + message);
+            return;
+        }
+        
+        this._outputChannel.appendLine(message);
+    }
+    
+
+    
     dispose() {
     }
+}
+
+enum UIMessageType {
+    Verbose = 0,
+    Info = 2,
+    Error = 4
 }
 
 // this method is called when your extension is deactivated

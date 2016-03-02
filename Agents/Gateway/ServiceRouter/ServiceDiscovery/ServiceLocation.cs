@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNet.Http;
 using System;
 using System.Collections.Generic;
+using System.Fabric.Health;
 using System.Fabric.Query;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,6 +30,7 @@ namespace ServiceRouter.ServiceDiscovery
         public string ServiceTypeName { get; set; }
         public string ServiceName { get; set; }
         public string ServiceVersion { get; set; }
+        public string ServiceHealth { get; set; }
 
         public Uri FabricAddress
         {

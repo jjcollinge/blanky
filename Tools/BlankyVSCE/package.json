@@ -48,6 +48,8 @@
 	"devDependencies": {
 		"typescript": "^1.6.2",
 		"vscode": "0.10.x",
-        "bauer-zip": "1.0.2"
+        "bauer-zip": "1.0.2",
+		"request-progress": "2.0.x",
+		"request": "2.69.x"
 	}
 }
