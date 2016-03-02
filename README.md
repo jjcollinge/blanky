@@ -1,3 +1,6 @@
+*Disclaimer
+Blanky was an exploratative venture to build a developer friendly platform ontop of Microsoft's Service Fabric. Our development on Blanky is being suspended until Service Fabric becomes generally available, at which point we will review the value of such a platform. Please feel free to submit Pull Requests as I will still consider merging in new content.
+
 Blanky
 ---------------
 
